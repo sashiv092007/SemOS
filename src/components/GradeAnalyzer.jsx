@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -15,6 +15,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { AppWindow, BADGE, BTN_PRIMARY as PRIMARY, CARD, FIELD as INPUT, Glow, LABEL, ScanLine as Laser } from "./ui";
 
 /* ------------------------------------------------------------------ */
 /*  Grade maths (pure functions)                                       */
@@ -199,12 +200,6 @@ function analyze({ target, subjects, assessments, relative }) {
 /*  Shared UI                                                          */
 /* ------------------------------------------------------------------ */
 
-const LABEL = "block font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400";
-const INPUT =
-  "border border-slate-800 bg-slate-950 px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-emerald-400 focus:outline-none";
-const CARD = "border border-slate-800 bg-slate-900/80";
-const PRIMARY =
-  "inline-flex items-center justify-center gap-2 bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400";
 
 const newId = () => Math.random().toString(36).slice(2, 10);
 const blankRow = () => ({ id: newId(), name: "", credits: "", total: "", scored: "", topper: "" });
@@ -220,15 +215,15 @@ const SAMPLE = [
 function StepCard({ n, title, done, children }) {
   return (
     <section className={CARD}>
-      <header className="flex items-center gap-3 border-b border-slate-800 px-4 py-2.5">
+      <header className="flex items-center gap-3 border-b border-slate-800/80 px-4 py-2.5">
         <span
-          className={`inline-flex h-5 w-5 items-center justify-center border font-mono text-[11px] ${
+          className={`inline-flex h-5 w-5 items-center justify-center rounded border font-mono text-[11px] ${
             done ? "border-emerald-400 bg-emerald-400 text-slate-950" : "border-slate-600 text-slate-300"
           }`}
         >
           {done ? <Check className="h-3 w-3" aria-hidden="true" /> : n}
         </span>
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">
+        <h2 className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
           Step {n} · {title}
         </h2>
       </header>
@@ -239,7 +234,7 @@ function StepCard({ n, title, done, children }) {
 
 function Alert({ children }) {
   return (
-    <p role="alert" className="mt-4 border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+    <p role="alert" className="mt-4 rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
       {children}
     </p>
   );
@@ -275,7 +270,7 @@ function SubjectRow({ row, index, parsed, relative, onChange, onRemove, canRemov
   }
 
   return (
-    <li className="border border-slate-800 bg-slate-950/60 p-3">
+    <li className="rounded-lg border border-slate-800 bg-slate-950/60 p-3 transition-all duration-200 hover:border-slate-700">
       <div className="flex items-start gap-2">
         <span className="pt-2.5 font-mono text-xs text-slate-500">{String(index + 1).padStart(2, "0")}</span>
         <div className="min-w-0 flex-1">
@@ -290,7 +285,7 @@ function SubjectRow({ row, index, parsed, relative, onChange, onRemove, canRemov
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {FIELDS.map((f) => (
               <label key={f.key} className="block">
-                <span className="block font-mono text-[10px] uppercase tracking-wider text-slate-500">{f.label}</span>
+                <span className="block font-mono text-[10px] uppercase tracking-widest text-slate-500">{f.label}</span>
                 <input
                   type="number"
                   inputMode="decimal"
@@ -313,7 +308,7 @@ function SubjectRow({ row, index, parsed, relative, onChange, onRemove, canRemov
           onClick={onRemove}
           disabled={!canRemove}
           aria-label={`Remove subject ${index + 1}`}
-          className="inline-flex h-10 w-9 shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-colors hover:border-slate-600 hover:text-white disabled:opacity-40"
+          className="inline-flex h-10 w-9 rounded-lg shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-all duration-200 hover:border-slate-700 hover:text-slate-100 disabled:opacity-40"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -333,7 +328,7 @@ function Badge({ tone, icon: Icon, children }) {
     bad: "border-red-400/50 bg-red-400/10 text-red-300",
   };
   return (
-    <p className={`flex items-start gap-2 border px-3 py-2.5 text-sm leading-relaxed ${tones[tone]}`}>
+    <p className={`flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm leading-relaxed ${tones[tone]}`}>
       {Icon ? <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" /> : null}
       <span>{children}</span>
     </p>
@@ -395,7 +390,7 @@ function ScoreCard({ result, target }) {
           </div>
           <div className="border-l border-slate-800 pl-4">
             <p className="text-xs text-slate-400">Target SGPA</p>
-            <p className="mt-1 font-mono text-4xl font-semibold tabular-nums text-white">{target.toFixed(2)}</p>
+            <p className="mt-1 font-mono text-4xl font-semibold tabular-nums text-slate-100">{target.toFixed(2)}</p>
             <p className={`mt-1 font-mono text-xs ${gap <= 0 ? "text-emerald-400" : "text-amber-300"}`}>
               {gap <= 0 ? `${Math.abs(gap).toFixed(2)} ahead` : `${gap.toFixed(2)} short`}
             </p>
@@ -429,7 +424,7 @@ function Roadmap({ result }) {
         {result.items.map((it) => (
           <li key={it.id} className="px-4 py-3.5">
             <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-              <p className="text-sm font-semibold text-white">{it.name}</p>
+              <p className="text-sm font-semibold text-slate-100">{it.name}</p>
               <span className="font-mono text-xs text-emerald-400">
                 target {it.band.letter} ({it.band.gp}) · {it.credits} cr
               </span>
@@ -469,7 +464,7 @@ function Ranking({ result }) {
           <li key={r.id} className="flex items-start gap-3 px-4 py-3">
             <span className="w-6 shrink-0 pt-0.5 font-mono text-sm text-slate-500">{String(i + 1).padStart(2, "0")}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white">{r.name}</p>
+              <p className="text-sm font-semibold text-slate-100">{r.name}</p>
               {r.reason ? (
                 <p className="mt-0.5 text-xs text-slate-500">{r.reason}</p>
               ) : (
@@ -509,6 +504,9 @@ export default function GradeAnalyzer() {
   const [stepError, setStepError] = useState("");
   const [fileError, setFileError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const scanTimer = useRef(null);
+  useEffect(() => () => clearTimeout(scanTimer.current), []);
 
   /* ----- step 1 ----- */
   const proceed = (e) => {
@@ -553,6 +551,12 @@ export default function GradeAnalyzer() {
       else if (!next.some((x) => x.name === f.name && x.size === f.size)) next.push({ name: f.name, size: f.size });
     }
     setFileError(bad.join(". "));
+    if (next.length > files.length) {
+      // sweep the laser over the document for a moment
+      setScanning(true);
+      clearTimeout(scanTimer.current);
+      scanTimer.current = setTimeout(() => setScanning(false), 3600);
+    }
     setFiles(next);
   };
   const weightSum = assessments.reduce((s, a) => s + a.weight, 0);
@@ -580,11 +584,11 @@ export default function GradeAnalyzer() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-400">Grade analyzer</p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+      <p className={BADGE}>Grade analyzer</p>
+      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Find the marks you need for your target
       </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
+      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
         Enter your marks so far and what is still to come. SemOS works out the minimum you need in each subject and
         where your study time pays off most.
       </p>
@@ -691,6 +695,7 @@ export default function GradeAnalyzer() {
 
           {step >= 3 ? (
             <StepCard n={3} title="Course delivery plan / evaluation pattern" done={false}>
+              <div className="relative overflow-hidden rounded-xl">
               <label
                 htmlFor="cdp-upload"
                 onDragOver={(e) => {
@@ -703,8 +708,10 @@ export default function GradeAnalyzer() {
                   setDragOver(false);
                   addFiles(e.dataTransfer.files);
                 }}
-                className={`block cursor-pointer border border-dashed px-4 py-4 transition-colors focus-within:border-emerald-400 ${
-                  dragOver ? "border-emerald-400 bg-emerald-400/5" : "border-slate-700 bg-slate-950 hover:border-slate-500"
+                className={`block cursor-pointer rounded-xl border border-dashed px-4 py-4 transition-colors focus-within:border-emerald-400 ${
+                  dragOver ? "border-emerald-400 bg-emerald-400/5" : files.length
+            ? "border-emerald-400/40 bg-emerald-400/[0.03] hover:border-emerald-400/60"
+            : "border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/40"
                 }`}
               >
                 <input
@@ -721,7 +728,7 @@ export default function GradeAnalyzer() {
                 <span className="flex items-start gap-3">
                   <Upload className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" aria-hidden="true" />
                   <span>
-                    <span className="block text-sm font-medium text-white">
+                    <span className="block text-sm font-medium text-slate-100">
                       Upload CDP / Syllabus Evaluation Breakdown (.pdf, .docx, screenshot)
                     </span>
                     <span className="mt-1 block text-xs leading-relaxed text-slate-500">
@@ -734,14 +741,14 @@ export default function GradeAnalyzer() {
               {files.length ? (
                 <ul className="mt-1.5 space-y-1">
                   {files.map((f) => (
-                    <li key={f.name + f.size} className="flex items-center gap-2 border border-slate-800 bg-slate-950/60 px-2.5 py-1.5">
+                    <li key={f.name + f.size} className="flex items-center gap-2 rounded-md border border-slate-800 bg-slate-950/60 px-2.5 py-1.5">
                       <FileText className="h-3.5 w-3.5 shrink-0 text-emerald-400" aria-hidden="true" />
                       <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-200">{f.name}</span>
                       <button
                         type="button"
                         onClick={() => setFiles(files.filter((x) => x !== f))}
                         aria-label={`Remove ${f.name}`}
-                        className="inline-flex h-5 w-5 items-center justify-center text-slate-500 transition-colors hover:text-white"
+                        className="inline-flex h-5 w-5 rounded items-center justify-center text-slate-500 transition-colors hover:text-slate-100"
                       >
                         <X className="h-3.5 w-3.5" aria-hidden="true" />
                       </button>
@@ -749,7 +756,14 @@ export default function GradeAnalyzer() {
                   ))}
                 </ul>
               ) : null}
-              {files.length ? (
+              {scanning ? <Laser /> : null}
+              </div>
+              {scanning ? (
+                <p className={`mt-2 ${BADGE}`} role="status">
+                  Scanning document…
+                </p>
+              ) : null}
+              {files.length && !scanning ? (
                 <p className="mt-2 text-xs text-amber-300">
                   Attached. Automatic reading of the file is not connected yet, so set the split below.
                 </p>
@@ -764,7 +778,7 @@ export default function GradeAnalyzer() {
                 <p className={LABEL}>Upcoming assessments</p>
                 <ul className="mt-2 space-y-2">
                   {assessments.map((a, i) => (
-                    <li key={a.id} className="border border-slate-800 bg-slate-950/60 p-3">
+                    <li key={a.id} className="rounded-lg border border-slate-800 bg-slate-950/60 p-3 transition-all duration-200 hover:border-slate-700">
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
@@ -791,7 +805,7 @@ export default function GradeAnalyzer() {
                           type="button"
                           onClick={() => setAssessments(assessments.filter((x) => x.id !== a.id))}
                           aria-label={`Remove assessment ${i + 1}`}
-                          className="inline-flex h-10 w-9 shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-colors hover:border-slate-600 hover:text-white"
+                          className="inline-flex h-10 w-9 rounded-lg shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-all duration-200 hover:border-slate-700 hover:text-slate-100"
                         >
                           <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </button>
@@ -865,34 +879,42 @@ export default function GradeAnalyzer() {
         </div>
 
         {/* RIGHT: live analysis and action plan */}
-        <div className="min-w-0 space-y-5 lg:sticky lg:top-20">
-          {result ? (
-            <>
-              <ScoreCard result={result} target={t} />
-              <Roadmap result={result} />
-              <Ranking result={result} />
-              <details className={`${CARD} px-4 py-3 text-xs text-slate-400`}>
-                <summary className="cursor-pointer font-mono uppercase tracking-[0.18em] text-slate-400">
-                  Grade scale used
-                </summary>
-                <p className="mt-3 font-mono leading-relaxed text-slate-300">
-                  {BANDS.map((b) => `${b.letter} ${b.min}%+ = ${b.gp}`).join(" · ")}
+        <div className="relative isolate min-w-0 space-y-5 lg:sticky lg:top-20">
+          <AppWindow
+            path="grades/analysis.md"
+            title="Live target analysis and action plan"
+            right={result ? "Live" : "Waiting"}
+            bodyClassName="space-y-4 bg-slate-950/40 p-3 sm:p-4"
+          >
+            {result ? (
+              <>
+                <ScoreCard result={result} target={t} />
+                <Roadmap result={result} />
+                <Ranking result={result} />
+                <details className={`${CARD} px-4 py-3 text-xs text-slate-400`}>
+                  <summary className="cursor-pointer font-mono uppercase tracking-wider text-slate-400">
+                    Grade scale used
+                  </summary>
+                  <p className="mt-3 font-mono leading-relaxed text-slate-300">
+                    {BANDS.map((b) => `${b.letter} ${b.min}%+ = ${b.gp}`).join(" · ")}
+                  </p>
+                  <p className="mt-2 leading-relaxed text-slate-500">
+                    Final % = marks so far × done weightage + upcoming marks × upcoming weightage. Check your
+                    university&apos;s own grade bands and any minimum end-sem pass mark.
+                  </p>
+                </details>
+              </>
+            ) : (
+              <div className="px-4 py-10 text-center">
+                <Target className="mx-auto h-6 w-6 text-slate-600" aria-hidden="true" />
+                <p className="mt-3 text-sm text-slate-300">Your projected SGPA and action plan appear here.</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {step === 1 ? "Set a target and subject count to begin." : "Fill in at least one subject's marks."}
                 </p>
-                <p className="mt-2 leading-relaxed text-slate-500">
-                  Final % = marks so far × done weightage + upcoming marks × upcoming weightage. Check your
-                  university&apos;s own grade bands and any minimum end-sem pass mark.
-                </p>
-              </details>
-            </>
-          ) : (
-            <section className={`${CARD} px-4 py-10 text-center`}>
-              <Target className="mx-auto h-6 w-6 text-slate-600" aria-hidden="true" />
-              <p className="mt-3 text-sm text-slate-300">Your projected SGPA and action plan appear here.</p>
-              <p className="mt-1 text-xs text-slate-500">
-                {step === 1 ? "Set a target and subject count to begin." : "Fill in at least one subject's marks."}
-              </p>
-            </section>
-          )}
+              </div>
+            )}
+          </AppWindow>
+          <Glow className="inset-x-0 -top-6 h-[30rem]" />
         </div>
       </div>
     </div>

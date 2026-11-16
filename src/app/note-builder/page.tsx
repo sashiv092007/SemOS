@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import NoteBuilder from "@/components/NoteBuilder";
 import { Navbar } from "@/components/SemOSLandingPage";
+import ToolTabs from "@/components/ToolTabs";
+import { Backdrop } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Note Builder · SemOS" };
 
 export default function NoteBuilderPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200">
+    <div className="min-h-screen bg-[#030712] text-slate-200">
       <Navbar />
-      <main>
+      <main className="relative isolate">
+        <Backdrop />
+        <ToolTabs wide />
         <NoteBuilder />
       </main>
     </div>

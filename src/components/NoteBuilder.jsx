@@ -19,6 +19,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
+import { BADGE, CARD_ACTIVE, Glow, LABEL, PAPER_SHADOW, WindowBar } from "./ui";
 
 /* ------------------------------------------------------------------ */
 /*  Sample note material (stands in for OCR output)                    */
@@ -272,11 +273,10 @@ async function buildPdf(pages) {
 /*  Small UI pieces                                                    */
 /* ------------------------------------------------------------------ */
 
-const LABEL = "block font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400";
 const TOOL =
-  "inline-flex h-9 min-w-9 items-center justify-center gap-1.5 border border-slate-800 px-2 font-mono text-xs text-slate-300 transition-colors hover:border-slate-600 hover:text-white disabled:opacity-40 disabled:hover:border-slate-800 disabled:hover:text-slate-300";
+  "inline-flex h-9 min-w-9 rounded-lg items-center justify-center gap-1.5 rounded-lg border border-slate-800 px-2 font-mono text-xs text-slate-300 transition-all duration-200 hover:border-slate-700 hover:text-slate-100 disabled:opacity-40 disabled:hover:border-slate-800 disabled:hover:text-slate-300";
 const EXPORT =
-  "inline-flex h-9 items-center justify-center gap-2 bg-emerald-500 px-3 text-xs font-bold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50";
+  "inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-emerald-500 px-3 text-xs font-bold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50";
 
 const MAX_FILES = 12;
 const MAX_MB = 15;
@@ -314,7 +314,7 @@ function Block({ block }) {
       );
     case "formula":
       return (
-        <figure className="mt-3 border border-slate-800 bg-slate-900 px-3.5 py-2.5">
+        <figure className="mt-3 rounded-md border border-slate-800 bg-slate-900 px-3.5 py-2.5">
           <figcaption className="font-sans text-[10px] uppercase tracking-[0.14em] text-slate-400">{block.label}</figcaption>
           <pre className="mt-1 overflow-x-auto whitespace-pre-wrap font-mono text-sm leading-relaxed text-emerald-400">
             {block.expr}
@@ -351,7 +351,7 @@ function PaperPage({ page, index, total, zoom }) {
   return (
     <article
       style={{ zoom }}
-      className="mx-auto w-full max-w-[40rem] border border-stone-300 bg-[#fbf9f1] px-6 py-7 font-serif text-slate-900 shadow-xl shadow-black/50 sm:px-10 sm:py-9"
+      className={`mx-auto w-full max-w-[40rem] border border-stone-300 bg-[#fbf9f1] px-6 py-7 font-serif text-slate-900 antialiased sm:px-10 sm:py-9 ${PAPER_SHADOW}`}
     >
       <header className="border-b-4 border-double border-slate-900 pb-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
@@ -554,19 +554,19 @@ export default function NoteBuilder() {
 
   return (
     <div className="mx-auto max-w-[100rem] px-4 py-8 sm:px-6 lg:py-10">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-400">Note builder</p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+      <p className={BADGE}>Note builder</p>
+      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Turn messy sources into clean notes
       </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
+      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
         Textbook photos, WhatsApp board screenshots, lecture slides and PDFs go in. Structured, page-by-page notes
         come out.
       </p>
 
       <div className="mt-7 grid items-start gap-6 xl:grid-cols-[35fr_65fr]">
         {/* LEFT 35%: upload and processing */}
-        <section className="min-w-0 border border-slate-800 bg-slate-900/40">
-          <h2 className={`border-b border-slate-800 px-4 py-2.5 ${LABEL}`}>Source upload &amp; processing engine</h2>
+        <section className={`min-w-0 overflow-hidden ${CARD_ACTIVE}`}>
+          <WindowBar path="notes/sources.queue" title="Source upload and processing engine" right="Input" />
           <div className="space-y-6 px-4 py-5">
             {/* Upload zone */}
             <div>
@@ -582,8 +582,10 @@ export default function NoteBuilder() {
                   setDragOver(false);
                   addFiles(e.dataTransfer.files);
                 }}
-                className={`block cursor-pointer border border-dashed px-4 py-6 text-center transition-colors focus-within:border-emerald-400 ${
-                  dragOver ? "border-emerald-400 bg-emerald-400/5" : "border-slate-700 bg-slate-950 hover:border-slate-500"
+                className={`block cursor-pointer rounded-xl border border-dashed px-4 py-6 text-center transition-colors focus-within:border-emerald-400 ${
+                  dragOver ? "border-emerald-400 bg-emerald-400/5" : files.length
+            ? "border-emerald-400/40 bg-emerald-400/[0.03] hover:border-emerald-400/60"
+            : "border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-900/40"
                 }`}
               >
                 <input
@@ -598,9 +600,9 @@ export default function NoteBuilder() {
                   }}
                 />
                 <ImagePlus className="mx-auto h-6 w-6 text-slate-500" aria-hidden="true" />
-                <span className="mt-2 block text-sm font-medium text-white">Drop photos, screenshots or PDFs</span>
+                <span className="mt-2 block text-sm font-medium text-slate-100">Drop photos, screenshots or PDFs</span>
                 <span className="mt-1 block text-xs text-slate-500">or click to browse</span>
-                <span className="mt-3 inline-block border border-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
+                <span className="mt-3 inline-block rounded-lg border border-slate-800 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
                   .jpg .png .webp .pdf · max {MAX_FILES} files · {MAX_MB} MB each
                 </span>
               </label>
@@ -608,7 +610,7 @@ export default function NoteBuilder() {
               {files.length ? (
                 <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4 xl:grid-cols-3 2xl:grid-cols-4">
                   {files.map((f) => (
-                    <li key={f.id} className="relative border border-slate-800 bg-slate-950">
+                    <li key={f.id} className="relative overflow-hidden rounded-lg border border-slate-800 bg-slate-950 transition-all duration-200 hover:border-slate-700">
                       <div className="flex aspect-square items-center justify-center overflow-hidden bg-slate-900">
                         {f.url ? (
                           // eslint-disable-next-line @next/next/no-img-element -- local blob preview
@@ -618,7 +620,7 @@ export default function NoteBuilder() {
                         )}
                       </div>
                       <span
-                        className={`absolute left-1 top-1 border px-1 py-0.5 font-mono text-[9px] leading-none ${
+                        className={`absolute left-1 top-1 rounded border px-1 py-0.5 font-mono text-[9px] leading-none ${
                           f.kind === "PDF"
                             ? "border-amber-400/50 bg-slate-950 text-amber-300"
                             : "border-emerald-400/50 bg-slate-950 text-emerald-400"
@@ -630,7 +632,7 @@ export default function NoteBuilder() {
                         type="button"
                         onClick={() => removeFile(f)}
                         aria-label={`Remove ${f.name}`}
-                        className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center border border-slate-700 bg-slate-950 text-slate-400 transition-colors hover:text-white"
+                        className="absolute right-1 top-1 inline-flex h-5 w-5 rounded items-center justify-center border border-slate-700 bg-slate-950 text-slate-400 transition-colors hover:text-slate-100"
                       >
                         <X className="h-3 w-3" aria-hidden="true" />
                       </button>
@@ -643,7 +645,8 @@ export default function NoteBuilder() {
                 </ul>
               ) : null}
               {files.length ? (
-                <p className="mt-2 font-mono text-[11px] text-slate-500">
+                <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] text-emerald-400">
+                  <Check className="h-3 w-3" aria-hidden="true" />
                   {files.length} file{files.length === 1 ? "" : "s"} in queue
                 </p>
               ) : null}
@@ -656,8 +659,8 @@ export default function NoteBuilder() {
                 {MODES.map((m) => (
                   <label
                     key={m.id}
-                    className={`flex cursor-pointer items-start gap-3 border px-3 py-2.5 transition-colors ${
-                      mode === m.id ? "border-emerald-400 bg-emerald-400/5" : "border-slate-800 bg-slate-950 hover:border-slate-600"
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border px-3 py-2.5 transition-all duration-200 ${
+                      mode === m.id ? "border-emerald-400 bg-emerald-400/5" : "border-slate-800 bg-slate-950/60 hover:border-slate-700"
                     }`}
                   >
                     <input
@@ -672,7 +675,7 @@ export default function NoteBuilder() {
                       className="mt-1 accent-emerald-500"
                     />
                     <span>
-                      <span className="block text-sm font-medium text-white">{m.label}</span>
+                      <span className="block text-sm font-medium text-slate-100">{m.label}</span>
                       <span className="block text-xs text-slate-500">{m.hint}</span>
                     </span>
                   </label>
@@ -688,7 +691,7 @@ export default function NoteBuilder() {
             </div>
 
             {error ? (
-              <p role="alert" className="border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+              <p role="alert" className="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
                 {error}.
               </p>
             ) : null}
@@ -699,7 +702,7 @@ export default function NoteBuilder() {
                 type="button"
                 onClick={() => startBuild(true)}
                 aria-busy={status === "processing"}
-                className={`flex w-full items-center justify-center gap-2 bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(16,185,129,0.45)] transition hover:bg-emerald-400 hover:shadow-[0_0_36px_rgba(16,185,129,0.6)] ${
+                className={`flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-[0_0_28px_rgba(16,185,129,0.45)] transition hover:bg-emerald-400 hover:shadow-[0_0_36px_rgba(16,185,129,0.6)] ${
                   status === "processing" ? "cursor-progress opacity-80" : ""
                 }`}
               >
@@ -717,20 +720,44 @@ export default function NoteBuilder() {
               </button>
 
               {status === "processing" ? (
-                <div className="mt-3" role="status">
-                  <div className="flex items-baseline justify-between gap-3 font-mono text-xs">
+                <div className="mt-3 rounded-lg border border-slate-800 bg-slate-950/60 p-3" role="status">
+                  <ol className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider">
+                    {["OCR", "Structure"].map((name, i) => {
+                      const active = (progress < 60 ? 0 : 1) === i;
+                      const done = i === 0 && progress >= 60;
+                      return (
+                        <li
+                          key={name}
+                          className={`flex items-center gap-1.5 rounded border px-1.5 py-1 ${
+                            active
+                              ? "border-emerald-400/50 bg-emerald-400/10 text-emerald-400"
+                              : done
+                                ? "border-slate-700 text-slate-300"
+                                : "border-slate-800 text-slate-500"
+                          }`}
+                        >
+                          {done ? <Check className="h-3 w-3" aria-hidden="true" /> : <span>{i + 1}</span>}
+                          {name}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <div className="mt-2.5 flex items-baseline justify-between gap-3 font-mono text-xs">
                     <span className="text-slate-300">{stage}</span>
                     <span className="tabular-nums text-emerald-400">{progress}%</span>
                   </div>
                   <div
-                    className="mt-1.5 h-1 bg-slate-800"
+                    className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-800"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={progress}
                     aria-label="Build progress"
                   >
-                    <div className="h-1 bg-emerald-400 transition-[width] duration-100" style={{ width: `${progress}%` }} />
+                    <div
+                      className="h-full rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)] transition-[width] duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
                 </div>
               ) : status === "complete" ? (
@@ -758,8 +785,14 @@ export default function NoteBuilder() {
         <section
           ref={viewerRef}
           aria-label="Interactive page viewer"
-          className={`relative flex min-w-0 flex-col border border-slate-800 bg-slate-950 ${fullscreen ? "h-screen" : ""}`}
+          className={`relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-800/80 border-t-white/10 bg-slate-900/40 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_40px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-slate-700/80 hover:border-t-white/10 ${fullscreen ? "h-screen" : ""}`}
         >
+          <WindowBar
+            path="notes/unit-3-process-synchronization.pdf"
+            title="Interactive page viewer"
+            right={total ? `${total} pages` : "Reader"}
+          />
+
           {/* Pagination header and toolbar */}
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-slate-800 px-3 py-2.5">
             <div className="flex items-center gap-2">
@@ -785,7 +818,7 @@ export default function NoteBuilder() {
                   }}
                   onBlur={() => setJumpDraft(null)}
                   aria-label="Jump to page"
-                  className="h-9 w-14 border border-slate-800 bg-slate-950 px-2 text-center font-mono text-sm text-emerald-400 focus:border-emerald-400 focus:outline-none disabled:opacity-40"
+                  className="h-9 w-14 rounded-lg border border-slate-800 bg-slate-950 px-2 text-center transition-all duration-200 hover:border-slate-700 font-mono text-sm text-emerald-400 focus:border-emerald-400 focus:outline-none disabled:opacity-40"
                 />
                 of <span className="text-slate-200">{total || "–"}</span>
               </label>
@@ -823,7 +856,7 @@ export default function NoteBuilder() {
               </button>
               <button type="button" onClick={handleDownloadPDF} disabled={!total || downloading} className={EXPORT}>
                 {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Download className="h-3.5 w-3.5" aria-hidden="true" />}
-                Download Notes as PDF
+                {downloading ? "Preparing PDF…" : "Download Notes as PDF"}
               </button>
             </div>
           </div>
@@ -837,8 +870,9 @@ export default function NoteBuilder() {
           {/* Reader canvas */}
           <div
             ref={canvasRef}
-            className={`overflow-y-auto overflow-x-hidden bg-slate-900/40 ${fullscreen ? "min-h-0 flex-1" : "h-[68vh] min-h-[26rem]"}`}
+            className={`relative isolate overflow-y-auto overflow-x-hidden bg-slate-900/40 ${fullscreen ? "min-h-0 flex-1" : "h-[68vh] min-h-[26rem]"}`}
           >
+            <Glow className="inset-x-8 top-8 h-[30rem]" />
             {total ? (
               <div
                 className="flex items-start transition-transform duration-300 ease-out motion-reduce:transition-none"
@@ -879,7 +913,7 @@ export default function NoteBuilder() {
               onClick={() => setDrawerOpen(!drawerOpen)}
               aria-expanded={drawerOpen}
               aria-controls="page-drawer"
-              className="flex w-full items-center justify-between px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400 transition-colors hover:text-white"
+              className="flex w-full items-center justify-between px-3 py-2 font-mono text-[10px] uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-100"
             >
               Quick navigation &amp; export
               {drawerOpen ? <ChevronDown className="h-4 w-4" aria-hidden="true" /> : <ChevronUp className="h-4 w-4" aria-hidden="true" />}
@@ -895,8 +929,8 @@ export default function NoteBuilder() {
                           onClick={() => goTo(i + 1)}
                           aria-label={`Go to page ${i + 1}`}
                           aria-current={i === page - 1 ? "page" : undefined}
-                          className={`block w-[4.5rem] border p-1 transition-colors ${
-                            i === page - 1 ? "border-emerald-400" : "border-slate-800 hover:border-slate-500"
+                          className={`block w-[4.5rem] rounded-md border p-1 transition-all duration-200 ${
+                            i === page - 1 ? "border-emerald-400" : "border-slate-800 hover:border-slate-700"
                           }`}
                         >
                           <span className="block h-20 bg-[#fbf9f1] px-1.5 py-1.5 text-left">
@@ -922,8 +956,8 @@ export default function NoteBuilder() {
                   <p className="flex-1 text-xs text-slate-500">Page thumbnails appear here after you build.</p>
                 )}
                 <button type="button" onClick={handleDownloadPDF} disabled={!total || downloading} className={EXPORT}>
-                  <Download className="h-3.5 w-3.5" aria-hidden="true" />
-                  Export All Pages as PDF
+                  {downloading ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> : <Download className="h-3.5 w-3.5" aria-hidden="true" />}
+                  {downloading ? "Preparing PDF…" : "Export All Pages as PDF"}
                 </button>
               </div>
             ) : null}
@@ -933,7 +967,7 @@ export default function NoteBuilder() {
           {toast ? (
             <div
               role="status"
-              className={`fixed bottom-5 right-5 z-50 flex items-center gap-2.5 border bg-slate-900 px-4 py-3 text-sm shadow-2xl shadow-black/70 ${
+              className={`fixed bottom-5 right-5 z-50 flex items-center gap-2.5 rounded-xl border bg-slate-900/95 px-4 py-3 text-sm shadow-2xl shadow-black/70 backdrop-blur-md ${
                 toast.kind === "error" ? "border-red-400/50 text-red-300" : "border-slate-700 text-slate-100"
               }`}
             >

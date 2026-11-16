@@ -3,7 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, FileDown, Menu, Share2, X } from "lucide-react";
+import SemosShowcase from "./SemosShowcase";
 import SemesterCountdown from "./SemesterCountdown";
+import { Backdrop, BADGE, CARD, Glow, PANEL } from "./ui";
 
 /* ------------------------------------------------------------------ */
 /*  Content                                                            */
@@ -57,7 +59,7 @@ const CATEGORIES = [
 
 function Logo() {
   return (
-    <Link href="/" className="font-mono text-base font-bold uppercase tracking-[0.2em] text-white">
+    <Link href="/" className="font-mono text-base font-bold uppercase tracking-[0.2em] text-slate-100">
       SEM<span className="text-emerald-400">OS</span>
     </Link>
   );
@@ -67,7 +69,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-slate-800 bg-[#030712]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6">
         <Logo />
 
@@ -84,12 +86,12 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          <a href="#" className="hidden text-sm text-slate-400 transition-colors hover:text-white sm:inline">
+          <a href="#" className="hidden text-sm text-slate-400 transition-colors hover:text-slate-100 sm:inline">
             Sign In
           </a>
           <a
             href="/roadmap"
-            className="inline-flex items-center gap-1.5 bg-emerald-500 px-3.5 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3.5 py-2 text-sm font-semibold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
           >
             Get Started
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -100,7 +102,7 @@ export function Navbar() {
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="inline-flex h-9 w-9 items-center justify-center border border-slate-800 text-slate-300 transition-colors hover:border-slate-600 hover:text-white md:hidden"
+            className="inline-flex h-9 w-9 rounded-lg items-center justify-center border border-slate-800 text-slate-300 transition-all duration-200 hover:border-slate-700 hover:text-slate-100 md:hidden"
           >
             {open ? <X className="h-4 w-4" aria-hidden="true" /> : <Menu className="h-4 w-4" aria-hidden="true" />}
           </button>
@@ -278,7 +280,8 @@ function SandTimer() {
 
 function Hero() {
   return (
-    <section id="top" className="relative border-b border-slate-800">
+    <section id="top" className="relative isolate overflow-x-clip border-b border-slate-800">
+      <Glow className="-left-40 -top-24 h-[30rem] w-[44rem]" />
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-24 pt-14 sm:px-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:pb-28 lg:pt-20">
         {/* Left column */}
         <div>
@@ -290,11 +293,11 @@ function Hero() {
             Panic-Mode UX Active
           </p>
 
-          <h1 className="mt-6 max-w-xl text-balance text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 max-w-xl text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-100 sm:text-5xl lg:text-6xl">
             Submit work on time to get the <span className="text-emerald-400">score you want.</span>
           </h1>
 
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">
+          <p className="mt-6 max-w-xl text-sm leading-relaxed text-slate-400 sm:text-base">
             SemOS harmonizes your syllabus, assignments, and exam roadmaps into a single high-density
             workspace—eliminating late penalties and securing your SGPA.
           </p>
@@ -302,14 +305,14 @@ function Hero() {
           <div className="mt-8 flex flex-wrap gap-3">
             <a
               href="/mastersheet"
-              className="inline-flex items-center gap-2 bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition-all duration-200 hover:bg-emerald-400"
             >
               Launch Mastersheet
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
             <a
               href="/roadmap"
-              className="inline-flex items-center gap-2 border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-500 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/60 px-5 py-3 text-sm font-semibold text-slate-200 backdrop-blur-md transition-all duration-200 hover:border-slate-700 hover:text-slate-100"
             >
               Explore Roadmaps
             </a>
@@ -318,7 +321,7 @@ function Hero() {
 
         {/* Right column */}
         <div className="flex flex-col items-center">
-          <div className="relative flex w-full max-w-sm items-center justify-center border border-slate-800 bg-slate-900/40 px-6 py-8">
+          <div className={`relative flex w-full max-w-sm items-center justify-center overflow-hidden px-6 py-8 ${CARD}`}>
             <div
               aria-hidden="true"
               className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/20 blur-3xl"
@@ -337,7 +340,7 @@ function Hero() {
       {/* Scroll indicator */}
       <a
         href="#mastersheet"
-        className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.18em] text-slate-500 transition-colors hover:text-emerald-400"
+        className="absolute bottom-5 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1 whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-slate-500 transition-colors hover:text-emerald-400"
       >
         Scroll to preview the Mastersheet
         <ChevronDown className="h-4 w-4 animate-bounce" aria-hidden="true" />
@@ -350,11 +353,10 @@ function Hero() {
 /*  Mastersheet workspace                                              */
 /* ------------------------------------------------------------------ */
 
-const PANEL = "border border-slate-700 bg-slate-900 shadow-2xl shadow-black/70";
 
 function PanelTitle({ children }) {
   return (
-    <h3 className="border-b border-slate-800 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">
+    <h3 className="border-b border-slate-800 px-4 py-2.5 font-mono text-[10px] uppercase tracking-widest text-slate-500">
       {children}
     </h3>
   );
@@ -363,10 +365,10 @@ function PanelTitle({ children }) {
 function BulletGroup({ title, items }) {
   return (
     <div className="px-4 py-4">
-      <h4 className="text-sm font-semibold text-white">{title}</h4>
+      <h4 className="text-sm font-semibold text-slate-100">{title}</h4>
       <ul className="mt-2.5 space-y-2">
         {items.map((item) => (
-          <li key={item} className="flex gap-2.5 text-[13px] leading-relaxed text-slate-400">
+          <li key={item} className="flex gap-2.5 text-[13px] leading-relaxed text-slate-300">
             <span aria-hidden="true" className="mt-[0.55rem] h-1 w-1 shrink-0 bg-slate-500" />
             {item}
           </li>
@@ -407,7 +409,7 @@ function ScoreGauge({ score }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-mono text-4xl font-semibold tabular-nums text-white">{score}</span>
+        <span className="font-mono text-4xl font-semibold tabular-nums text-slate-100">{score}</span>
         <span className="font-mono text-[11px] text-slate-500">/ 100</span>
       </div>
     </div>
@@ -420,21 +422,21 @@ function ScorePanel({ className = "" }) {
       <PanelTitle>Exam readiness score</PanelTitle>
       <div className="flex flex-col items-center px-4 pb-5 pt-6">
         <ScoreGauge score={SCORE} />
-        <span className="mt-4 border border-emerald-400/50 bg-emerald-400/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-400">
+        <span className="mt-4 border border-emerald-400/50 bg-emerald-400/10 px-2.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-400">
           Excellent
         </span>
       </div>
       <div className="border-t border-slate-800 px-4 py-4">
-        <h4 className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400">Category breakdown</h4>
+        <h4 className="font-mono text-[10px] uppercase tracking-widest text-slate-500">Category breakdown</h4>
         <ul className="mt-3.5 space-y-3.5">
           {CATEGORIES.map((c) => (
             <li key={c.label}>
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-xs text-slate-300">{c.label}</span>
-                <span className="font-mono text-xs tabular-nums text-white">{c.value}</span>
+                <span className="font-mono text-xs tabular-nums text-slate-100">{c.value}</span>
               </div>
-              <div className="mt-1.5 h-1 bg-slate-800">
-                <div className="h-1 bg-emerald-400" style={{ width: `${c.value}%` }} />
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-full rounded-full bg-emerald-400" style={{ width: `${c.value}%` }} />
               </div>
             </li>
           ))}
@@ -455,7 +457,7 @@ function SheetHeading({ n, children }) {
 
 function DocumentSheet() {
   return (
-    <article className="border border-stone-300 bg-[#fbf9f1] px-5 py-7 font-serif text-slate-900 shadow-[6px_6px_0_0_rgba(15,23,42,0.9),6px_6px_0_1px_rgba(51,65,85,0.9)] sm:px-10 sm:py-10 xl:px-32 xl:py-12">
+    <article className="border border-stone-300 bg-[#fbf9f1] px-5 py-7 font-serif text-slate-900 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] sm:px-10 sm:py-10 xl:px-32 xl:py-12">
       <header className="border-b-4 border-double border-slate-900 pb-4">
         <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500">
           SEMOS <span className="text-slate-400">/</span> CS301 Operating Systems
@@ -470,7 +472,7 @@ function DocumentSheet() {
           {FORMULAS.map((f) => (
             <div key={f.name} className="border-b border-dotted border-stone-300 py-3">
               <dt className="text-sm text-slate-600">{f.name}</dt>
-              <dd className="mt-0.5 font-mono text-base font-medium">{f.expr}</dd>
+              <dd className="mt-1 rounded-sm border border-stone-300 bg-stone-200/50 px-2 py-1 font-mono text-base font-medium">{f.expr}</dd>
               <dd className="mt-0.5 text-xs italic text-slate-500">{f.note}</dd>
             </div>
           ))}
@@ -502,26 +504,26 @@ function DocumentSheet() {
 
 function MastersheetWorkspace() {
   return (
-    <section id="mastersheet" className="scroll-mt-14">
+    <section id="mastersheet" className="relative isolate scroll-mt-14 overflow-x-clip">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-800 pb-5">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-400">Mastersheet workspace</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight text-white sm:text-2xl">
+            <p className={BADGE}>Mastersheet workspace</p>
+            <h2 className="mt-2 text-xl font-extrabold tracking-tight text-slate-100 sm:text-2xl">
               Operating Systems <span className="font-mono text-slate-400">(CS301)</span> — Last-Minute Mastersheet
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-2 border border-slate-800 px-3 py-2 font-mono text-xs text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-800 px-3 py-2 font-mono text-xs text-slate-300 transition-all duration-200 hover:border-slate-700 hover:text-slate-100"
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden="true" />
               Share
             </button>
             <button
               type="button"
-              className="inline-flex items-center gap-2 bg-emerald-500 px-3 py-2 font-mono text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+              className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-3 py-2 font-mono text-xs font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
             >
               <FileDown className="h-3.5 w-3.5" aria-hidden="true" />
               Export PDF
@@ -534,7 +536,8 @@ function MastersheetWorkspace() {
           the dark panels are absolutely positioned over its top-left corner and right edge.
           The sheet's wide xl side padding keeps its text clear of both panels.
         */}
-        <div className="relative mt-8 flex flex-col gap-5 xl:mt-10 xl:block xl:min-h-[42rem]">
+        <div className="relative isolate mt-8 flex flex-col gap-5 xl:mt-10 xl:block xl:min-h-[42rem]">
+          <Glow className="inset-x-0 top-10 h-[36rem]" />
           <FoundPanel className="xl:absolute xl:left-0 xl:top-14 xl:z-10 xl:w-[17rem]" />
           <div className="xl:ml-44 xl:mr-52">
             <DocumentSheet />
@@ -552,11 +555,13 @@ function MastersheetWorkspace() {
 
 export default function SemOSLandingPage() {
   return (
-    <div className="min-h-screen scroll-smooth bg-slate-950 font-sans text-slate-200 antialiased">
+    <div className="relative isolate min-h-screen scroll-smooth bg-[#030712] font-sans text-slate-200 antialiased">
+      <Backdrop />
       <Navbar />
       <main>
         <Hero />
         <MastersheetWorkspace />
+        <SemosShowcase />
       </main>
     </div>
   );

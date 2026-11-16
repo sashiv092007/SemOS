@@ -11,7 +11,7 @@ export default function SemesterCountdown({ className = "" }: { className?: stri
   const plan = usePlan();
   const now = useNow();
 
-  const box = `block border border-slate-800 bg-slate-900 px-4 py-3 text-center font-mono text-xs text-slate-400 transition-colors hover:border-slate-600 sm:text-sm ${className}`;
+  const box = `block rounded-lg border border-slate-800/80 bg-slate-900/60 px-4 py-3 text-center font-mono text-xs uppercase tracking-wider text-slate-500 backdrop-blur-md transition-all duration-200 hover:border-slate-700 ${className}`;
 
   if (!plan || now === 0) {
     return (
@@ -28,7 +28,7 @@ export default function SemesterCountdown({ className = "" }: { className?: stri
   return (
     <Link href="/roadmap" className={box}>
       Semester Timeline:{" "}
-      <span className="whitespace-nowrap font-semibold tabular-nums text-emerald-400">{formatRemaining(left)}</span>{" "}
+      <span className="whitespace-nowrap font-semibold normal-case tabular-nums text-emerald-400">{formatRemaining(left)}</span>{" "}
       {left > 0 ? "remaining" : "· deadline passed"}
     </Link>
   );

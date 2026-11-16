@@ -1,12 +1,88 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    --background: #030712;
+    --foreground: #f1f5f9;
+    --card: rgba(15, 23, 42, 0.6);
+    --card-border: rgba(51, 65, 85, 0.8);
+    --primary: #10b981;
+    --accent-cyan: #22d3ee;
+    --paper-bg: #fbf9f1;
+    --paper-text: #0c0a09;
+  }
+}
+
+/* Glass & Border Layering */
+.glass-container {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Academic Paper Sheet Frame */
+.academic-paper {
+  background-color: var(--paper-bg);
+  color: var(--paper-text);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.95);
+  border: 1px solid #e7e5e4;
+}
+
+/*
+  Dynamic laser sweep.
+  The beam is a 2px line, so translateY(%) would only move it by its own
+  height (a couple of pixels). It moves with `top` instead, which travels
+  the full height of the scanner box. Timing, easing and fade are as specified.
+*/
+@keyframes laserSweep {
+  0% { top: 0%; opacity: 0.3; }
+  50% { top: 100%; opacity: 1; }
+  100% { top: 0%; opacity: 0.3; }
+}
+
+.animate-laser-scan {
+  animation: laserSweep 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Kept from the previous stylesheet: other pages depend on these.    */
+/* ------------------------------------------------------------------ */
+
+/* Fonts: system font for text, Geist Mono for code and badges */
 @theme inline {
-  --font-sans: var(--font-inter);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: #020617; /* slate-950 */
-  color: #e2e8f0; /* slate-200 */
-  font-family: var(--font-inter), system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
 }
+
+/* Vertical laser sweeping left to right: Grade Analyzer CDP upload (<ScanLine />) */
+@keyframes scanLine {
+  0% { left: 0%; }
+  50% { left: 100%; }
+  100% { left: 0%; }
+}
+.animate-scanLine {
+  animation: scanLine 3.6s ease-in-out infinite;
+}
+
+/* Soft entrance when switching tabs */
+@keyframes showcaseIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-showcaseIn {
+  animation: showcaseIn 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-laser-scan { animation: none; top: 50%; }
+  .animate-scanLine { animation: none; left: 50%; }
+  .animate-showcaseIn { animation: none; }
+}
+

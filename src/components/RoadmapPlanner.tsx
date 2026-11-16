@@ -14,14 +14,12 @@ import {
   type Plan,
   type Slot,
 } from "@/lib/plan";
+import { AppWindow, BADGE, CARD, FIELD as INPUT, LABEL } from "./ui";
 
 type Row = { id: string; name: string; hours: string; done: boolean };
 
 const blankRow = (): Row => ({ id: newId(), name: "", hours: "", done: false });
 
-const INPUT =
-  "border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:border-emerald-400 focus:outline-none";
-const LABEL = "font-mono text-[11px] uppercase tracking-[0.18em] text-slate-400";
 
 const fmtDate = (ms: number) =>
   new Date(ms).toLocaleString(undefined, {
@@ -78,12 +76,12 @@ function PlanForm({ plan }: { plan: Plan | null }) {
   }
 
   return (
-    <form onSubmit={submit} className="border border-slate-800 bg-slate-900/40">
+    <form onSubmit={submit} className={`min-w-0 ${CARD}`}>
       <h2 className={`border-b border-slate-800 px-4 py-2.5 ${LABEL}`}>Your assignments</h2>
 
       <div className="space-y-5 px-4 py-4">
         <div>
-          <label htmlFor="days" className={`block ${LABEL}`}>
+          <label htmlFor="days" className={LABEL}>
             Time you have (days)
           </label>
           <input
@@ -129,7 +127,7 @@ function PlanForm({ plan }: { plan: Plan | null }) {
                   onClick={() => setRows((rs) => (rs.length > 1 ? rs.filter((x) => x.id !== r.id) : rs))}
                   disabled={rows.length === 1}
                   aria-label={`Remove assignment ${i + 1}`}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-colors hover:border-slate-600 hover:text-white disabled:opacity-40"
+                  className="inline-flex h-9 w-9 rounded-lg shrink-0 items-center justify-center border border-slate-800 text-slate-500 transition-all duration-200 hover:border-slate-700 hover:text-slate-100 disabled:opacity-40"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
@@ -147,7 +145,7 @@ function PlanForm({ plan }: { plan: Plan | null }) {
         </fieldset>
 
         {error ? (
-          <p role="alert" className="border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+          <p role="alert" className="rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
             {error}
           </p>
         ) : null}
@@ -155,7 +153,7 @@ function PlanForm({ plan }: { plan: Plan | null }) {
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
-            className="bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+            className="rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
           >
             {plan ? "Update schedule" : "Build schedule and start timer"}
           </button>
@@ -165,7 +163,7 @@ function PlanForm({ plan }: { plan: Plan | null }) {
               onClick={() => {
                 if (window.confirm("Clear this schedule and stop the timer?")) savePlan(null);
               }}
-              className="border border-slate-800 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:border-slate-600 hover:text-white"
+              className="rounded-lg border border-slate-800 px-4 py-2.5 text-sm text-slate-300 transition-all duration-200 hover:border-slate-700 hover:text-slate-100"
             >
               Clear and start over
             </button>
@@ -202,7 +200,7 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
   return (
     <div className="space-y-4">
       {/* Countdown */}
-      <section className="border border-slate-800 bg-slate-900/40">
+      <section className={CARD}>
         <h2 className={`border-b border-slate-800 px-4 py-2.5 ${LABEL}`}>Semester timeline</h2>
         <div className="px-4 py-5">
           <p className="font-mono text-3xl font-semibold tabular-nums text-emerald-400 sm:text-4xl">
@@ -215,11 +213,11 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
             {totalHours}h of work over {plan.days} {plan.days === 1 ? "day" : "days"} ≈ {perDay.toFixed(1)}h a day
           </p>
           {perDay > 24 ? (
-            <p className="mt-3 border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
+            <p className="mt-3 rounded-lg border border-red-400/40 bg-red-400/10 px-3 py-2 text-sm text-red-300">
               This is more work than there are hours before the deadline. Cut scope or ask for an extension.
             </p>
           ) : perDay > 8 ? (
-            <p className="mt-3 border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-300">
+            <p className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 px-3 py-2 text-sm text-amber-300">
               More than 8 hours a day. This plan is tight.
             </p>
           ) : null}
@@ -227,7 +225,7 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
       </section>
 
       {/* Order */}
-      <section className="border border-slate-800 bg-slate-900/40">
+      <section className={CARD}>
         <h2 className={`border-b border-slate-800 px-4 py-2.5 ${LABEL}`}>Order of work · largest first</h2>
 
         {/* Window bar */}
@@ -249,7 +247,7 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
               style={{ left: `${progress}%` }}
             />
           </div>
-          <div className="mt-1.5 flex justify-between font-mono text-[10px] uppercase tracking-wider text-slate-500">
+          <div className="mt-1.5 flex justify-between font-mono text-[10px] uppercase tracking-widest text-slate-500">
             <span>Start</span>
             <span>Deadline</span>
           </div>
@@ -265,10 +263,10 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <p className={`text-sm font-semibold ${s.done ? "text-slate-500 line-through" : "text-white"}`}>
+                    <p className={`text-sm font-semibold ${s.done ? "text-slate-500 line-through" : "text-slate-100"}`}>
                       {s.name}
                     </p>
-                    <span className={`border px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none ${st.cls}`}>
+                    <span className={`rounded border px-1.5 py-0.5 font-mono text-[10px] uppercase leading-none ${st.cls}`}>
                       {st.label}
                     </span>
                   </div>
@@ -284,7 +282,7 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
                   onClick={() => toggle(s.id)}
                   aria-pressed={s.done}
                   aria-label={s.done ? `Mark ${s.name} as not done` : `Mark ${s.name} as done`}
-                  className={`inline-flex h-8 w-8 shrink-0 items-center justify-center border transition-colors ${
+                  className={`inline-flex h-8 w-8 rounded-lg shrink-0 items-center justify-center border transition-colors ${
                     s.done
                       ? "border-emerald-400 bg-emerald-400 text-slate-950"
                       : "border-slate-700 text-transparent hover:border-emerald-400 hover:text-emerald-400"
@@ -310,11 +308,11 @@ export default function RoadmapPlanner() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
-      <p className="font-mono text-xs uppercase tracking-[0.18em] text-emerald-400">Roadmap</p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+      <p className={BADGE}>Roadmap</p>
+      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Schedule your assignments
       </h1>
-      <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400">
+      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
         Tell SemOS what is due and how long you have. It orders the work largest first, splits your time between
         the assignments, and starts the countdown.
       </p>
@@ -325,13 +323,21 @@ export default function RoadmapPlanner() {
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
           {/* key: reset the form when a plan is cleared or first created */}
           <PlanForm key={plan ? plan.startAt : "new"} plan={plan} />
-          {plan ? (
-            <Schedule plan={plan} now={now} />
-          ) : (
-            <div className="border border-dashed border-slate-800 px-4 py-10 text-center text-sm text-slate-500">
-              Your schedule and countdown appear here once you add assignments.
-            </div>
-          )}
+          <AppWindow
+            path="roadmap/schedule.timeline"
+            className="min-w-0"
+            title="Schedule and countdown"
+            right={plan ? "Live" : "Waiting"}
+            bodyClassName="bg-slate-950/40 p-3 sm:p-4"
+          >
+            {plan ? (
+              <Schedule plan={plan} now={now} />
+            ) : (
+              <p className="px-4 py-10 text-center text-sm text-slate-500">
+                Your schedule and countdown appear here once you add assignments.
+              </p>
+            )}
+          </AppWindow>
         </div>
       )}
 
