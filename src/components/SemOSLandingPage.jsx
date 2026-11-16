@@ -10,7 +10,7 @@ import SemesterCountdown from "./SemesterCountdown";
 /* ------------------------------------------------------------------ */
 
 const NAV_LINKS = [
-  { label: "Mastersheet", href: "/#mastersheet" },
+  { label: "Mastersheet", href: "/mastersheet" },
   { label: "Grade Analyzer", href: "#" },
   { label: "Note Builder", href: "#" },
   { label: "Roadmaps", href: "/roadmap" },
@@ -301,7 +301,7 @@ function Hero() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <a
-              href="#mastersheet"
+              href="/mastersheet"
               className="inline-flex items-center gap-2 bg-emerald-500 px-5 py-3 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
             >
               Launch Mastersheet
