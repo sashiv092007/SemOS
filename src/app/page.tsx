@@ -1,5 +1,5 @@
-import SemOSDashboard from "@/components/SemOSDashboard";
+import SemOSLandingPage from "@/components/SemOSLandingPage";
 
 export default function Home() {
-  return <SemOSDashboard />;
+  return <SemOSLandingPage />;
 }

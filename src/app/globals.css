@@ -86,38 +86,3 @@ body {
   .animate-showcaseIn { animation: none; }
 }
 
-
-/* ------------------------------------------------------------------ */
-/*  Bento-grid dashboard                                               */
-/* ------------------------------------------------------------------ */
-
-:root {
-  --bg-app: #090d16;
-  --bg-slate: #0b0f17;
-  --card-surface: #131b2e;
-  --card-border: rgba(255, 255, 255, 0.08);
-  --accent-purple: #8b5cf6;
-  --accent-orange: #ff7d54;
-  --accent-blue: #3b82f6;
-  --accent-green: #10b981;
-}
-
-/*
-  In the components layer so utility classes on a card (gradient backgrounds,
-  coloured borders) override these defaults instead of being overridden by them.
-*/
-@layer components {
-  .bento-card {
-    background: var(--card-surface);
-    border: 1px solid var(--card-border);
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-
-  .bento-card:hover {
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.7);
-  }
-}
-
