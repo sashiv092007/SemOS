@@ -11,8 +11,8 @@ import SemesterCountdown from "./SemesterCountdown";
 
 const NAV_LINKS = [
   { label: "Mastersheet", href: "/mastersheet" },
-  { label: "Grade Analyzer", href: "#" },
-  { label: "Note Builder", href: "#" },
+  { label: "Grade Analyzer", href: "/grade-analyzer" },
+  { label: "Note Builder", href: "/note-builder" },
   { label: "Roadmaps", href: "/roadmap" },
 ];
 
