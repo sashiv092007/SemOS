@@ -6,22 +6,12 @@
  * The API key stays on the server. Set GEMINI_API_KEY in .env.local.
  */
 
-export const maxDuration = 60;
+import { AiError, aiErrorResponse, filesToParts, generateJson, requireKey, type Part } from "@/lib/gemini";
 
-const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
-const API_REVISION = "2026-05-20";
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+export const maxDuration = 60;
 
 const MAX_TOTAL_BYTES = 18 * 1024 * 1024;
 const MAX_FILES = 10;
-
-const MIME: Record<string, { type: "document" | "image"; mime: string }> = {
-  ".pdf": { type: "document", mime: "application/pdf" },
-  ".png": { type: "image", mime: "image/png" },
-  ".jpg": { type: "image", mime: "image/jpeg" },
-  ".jpeg": { type: "image", mime: "image/jpeg" },
-  ".webp": { type: "image", mime: "image/webp" },
-};
 
 const SCHEMA = {
   type: "object",
@@ -109,19 +99,6 @@ function buildPrompt(o: {
     .join("\n");
 }
 
-/** Pull the generated text out of an Interactions API response. */
-function extractText(body: unknown): string | null {
-  const b = body as { output_text?: unknown; steps?: { content?: { text?: unknown }[] }[] };
-  if (typeof b?.output_text === "string") return b.output_text;
-  const steps = Array.isArray(b?.steps) ? b.steps : [];
-  for (let i = steps.length - 1; i >= 0; i--) {
-    for (const part of steps[i]?.content ?? []) {
-      if (typeof part?.text === "string" && part.text.trim()) return part.text;
-    }
-  }
-  return null;
-}
-
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 function clean(raw: unknown) {
@@ -158,9 +135,10 @@ function clean(raw: unknown) {
 const fail = (status: number, error: string, code?: string) => Response.json({ error, code }, { status });
 
 export async function POST(request: Request) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) {
-    return fail(503, "AI is not set up yet. Add GEMINI_API_KEY to the .env.local file and restart the server.", "no_key");
+  try {
+    requireKey();
+  } catch (e) {
+    return aiErrorResponse(e);
   }
 
   let form: FormData;
@@ -192,66 +170,25 @@ export async function POST(request: Request) {
     return fail(400, "Attach a PDF or add at least one topic.");
   }
 
-  const skipped: string[] = [];
-  const parts: Record<string, string>[] = [];
-  let notesRead = 0;
-  let pyqsRead = 0;
-  for (const [group, files] of [["notes", notes], ["pyqs", pyqs]] as const) {
-    for (const file of files) {
-      const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase() : "";
-      const kind = MIME[ext];
-      if (!kind) {
-        skipped.push(file.name);
-        continue;
-      }
-      const data = Buffer.from(await file.arrayBuffer()).toString("base64");
-      parts.push({ type: kind.type, data, mime_type: kind.mime });
-      if (group === "notes") notesRead++;
-      else pyqsRead++;
-    }
-  }
+  const notesIn = await filesToParts(notes);
+  const pyqsIn = await filesToParts(pyqs);
+  const skipped = [...notesIn.skipped, ...pyqsIn.skipped];
+  const parts: Part[] = [...notesIn.parts, ...pyqsIn.parts];
   if (all.length > 0 && parts.length === 0) {
     return fail(400, "None of these files can be read. Use PDF or image files; export Word files as PDF first.");
   }
 
-  parts.push({ type: "text", text: buildPrompt({ subject, unit, topics, pattern, notesCount: notesRead, pyqCount: pyqsRead }) });
+  parts.push({
+    type: "text",
+    text: buildPrompt({ subject, unit, topics, pattern, notesCount: notesIn.parts.length, pyqCount: pyqsIn.parts.length }),
+  });
 
-  let res: Response;
   try {
-    res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key, "Api-Revision": API_REVISION },
-      body: JSON.stringify({
-        model: MODEL,
-        input: parts,
-        response_format: { type: "text", mime_type: "application/json", schema: SCHEMA },
-      }),
-      signal: AbortSignal.timeout(55_000),
-    });
-  } catch {
-    return fail(504, "The AI service did not answer in time. Try again, or use a smaller file.");
+    const { data, model } = await generateJson(parts, SCHEMA);
+    const sheet = clean(data);
+    if (sheet.topics.length === 0) throw new AiError(502, "The AI could not find any topics in this material.");
+    return Response.json({ ...sheet, filesRead: parts.length - 1, skipped, model });
+  } catch (e) {
+    return aiErrorResponse(e);
   }
-
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const detail = str((body as { error?: { message?: unknown } })?.error?.message, 300);
-    if (res.status === 429) return fail(429, "The free AI quota is used up for now. Wait a minute and try again.");
-    if (res.status === 401 || res.status === 403) return fail(502, `The Gemini API key was rejected. ${detail}`);
-    return fail(502, `The AI service returned an error (${res.status}). ${detail}`);
-  }
-
-  const text = extractText(body);
-  if (!text) return fail(502, "The AI returned no content. It may have declined this file; try another.");
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ""));
-  } catch {
-    return fail(502, "The AI answer could not be understood. Try again.");
-  }
-
-  const sheet = clean(parsed);
-  if (sheet.topics.length === 0) return fail(502, "The AI could not find any topics in this material.");
-
-  return Response.json({ ...sheet, filesRead: parts.length - 1, skipped, model: MODEL });
 }
