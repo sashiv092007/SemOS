@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-three/fiber": "^9.8.2",
+    "@supabase/supabase-js": "^2.119.2",
     "clsx": "^2.1.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.73.0",

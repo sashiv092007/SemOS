@@ -5,6 +5,8 @@ import { Layers, FileStack, Printer } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
+import { saveToLibrary } from "@/lib/account";
+import SavedShelf from "./SavedShelf";
 import Lazy3D from "./three/Lazy3D";
 import { CARD_ACTIVE, FIELD, Glow, LABEL, PANEL, WindowBar } from "./ui";
 import { BookOpen, ChevronDown, FileText, Loader2, ScrollText, Sparkles, Upload, X } from "lucide-react";
@@ -658,9 +660,27 @@ export default function MastersheetGenerator() {
   const latest = useRef(null);
 
   // Handlers that fire later (debounced upload, fetch) read the newest form values from here.
+  const latestPrioritize = useRef(prioritize);
   useEffect(() => {
     latest.current = { subject, unit, topics, pattern, edited };
+    latestPrioritize.current = prioritize;
   });
+
+  /** Show a mastersheet saved in the account. */
+  const openSaved = (saved) => {
+    request.current?.abort();
+    clearTimeout(debounce.current);
+    setSubject(saved.subject ?? "");
+    setUnit(saved.unit ?? "");
+    setTopics(saved.topics ?? []);
+    if (PATTERNS.includes(saved.pattern)) setPattern(saved.pattern);
+    if (typeof saved.prioritize === "boolean") setPrioritize(saved.prioritize);
+    setNotes([]);
+    setPyqs([]);
+    setEdited({ subject: true, unit: true, topics: true });
+    setError("");
+    setAi({ status: "done", data: saved.ai ?? null, error: "", at: "", stale: false });
+  };
   useEffect(
     () => () => {
       clearTimeout(debounce.current);
@@ -717,9 +737,21 @@ export default function MastersheetGenerator() {
         at: new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
         stale: false,
       });
-      if (json.subject && !(cur.edited.subject && cur.subject.trim())) setSubject(json.subject);
-      if (json.unit && !(cur.edited.unit && cur.unit.trim())) setUnit(json.unit);
-      setTopics(json.topics.map((t) => t.term).slice(0, MAX_TOPICS));
+      const nextSubject = json.subject && !(cur.edited.subject && cur.subject.trim()) ? json.subject : cur.subject;
+      const nextUnit = json.unit && !(cur.edited.unit && cur.unit.trim()) ? json.unit : cur.unit;
+      const nextTopics = json.topics.map((t) => t.term).slice(0, MAX_TOPICS);
+      setSubject(nextSubject);
+      setUnit(nextUnit);
+      setTopics(nextTopics);
+      // Signed in: keep a copy in the account (does nothing when signed out).
+      saveToLibrary("mastersheet", [nextSubject, nextUnit].filter(Boolean).join(" · ") || "Mastersheet", {
+        subject: nextSubject,
+        unit: nextUnit,
+        topics: nextTopics,
+        pattern: cur.pattern,
+        prioritize: latestPrioritize.current,
+        ai: json,
+      });
     } catch (err) {
       if (err.name === "AbortError") return;
       setAi((a) => ({ ...a, status: a.data ? "done" : "idle", error: err.message }));
@@ -950,6 +982,8 @@ export default function MastersheetGenerator() {
                     ? `Last generated ${generatedAt}`
                     : "Attach a PDF and the sheet builds itself."}
             </p>
+
+            <SavedShelf kind="mastersheet" label="mastersheets" onOpen={openSaved} />
           </div>
         </form>
 

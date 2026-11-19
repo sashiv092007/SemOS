@@ -23,6 +23,7 @@ import { buildSchedule, deadlineOf, formatRemaining, timeEntries, useNow, usePla
 import { weatherFromPlan, type AssignmentStatus } from "@/lib/weather";
 import DynamicWeatherBackground from "./DynamicWeatherBackground";
 import Hourglass3D from "./Hourglass3D";
+import AccountButton from "./AccountButton";
 import { DocumentSheet, SandTimer } from "./SemOSLandingPage";
 
 /* ------------------------------------------------------------------ */
@@ -192,9 +193,12 @@ function Nav({ theme }: { theme: Theme }) {
           </Link>
         ))}
       </nav>
-      <Link href="/roadmap" className={BTN_DARK}>
-        Start planning
-      </Link>
+      <div className="flex items-center gap-2">
+        <AccountButton tone="glass" />
+        <Link href="/roadmap" className={BTN_DARK}>
+          Start planning
+        </Link>
+      </div>
     </header>
   );
 }

@@ -5,6 +5,8 @@ import { ListChecks, FileDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
+import { saveToLibrary } from "@/lib/account";
+import SavedShelf from "./SavedShelf";
 import Lazy3D from "./three/Lazy3D";
 import {
   Check,
@@ -525,6 +527,16 @@ export default function NoteBuilder() {
     setCurrentPage(1);
   };
 
+  /** Show notes saved in the account in the reader. */
+  const openSaved = (saved) => {
+    if (!Array.isArray(saved?.topics)) return;
+    request.current?.abort();
+    setError("");
+    setNotes({ subject: saved.subject ?? "", unit: saved.unit ?? "", topics: saved.topics });
+    finish();
+    triggerSweep();
+  };
+
   const startBuild = async (useFiles) => {
     if (status === "processing") return;
     if (useFiles && files.length === 0) {
@@ -553,8 +565,11 @@ export default function NoteBuilder() {
       const res = await fetch("/api/notes", { method: "POST", body, signal: controller.signal });
       const json = await res.json().catch(() => null);
       if (!res.ok || !json) throw new Error(json?.error || "The notes could not be built. Try again.");
-      setNotes({ subject: json.subject, unit: json.unit, topics: json.topics });
+      const built = { subject: json.subject, unit: json.unit, topics: json.topics };
+      setNotes(built);
       finish();
+      // Signed in: keep a copy in the account (does nothing when signed out).
+      saveToLibrary("notes", [built.subject, built.unit].filter(Boolean).join(" · ") || "Notes", built);
       const issues = [...(json.unreadable ?? []), ...(json.skipped ?? []).map((n) => `${n} was skipped`)];
       showToast(
         issues.length
@@ -864,6 +879,8 @@ export default function NoteBuilder() {
                 </p>
               )}
             </div>
+
+            <SavedShelf kind="notes" label="notes" onOpen={openSaved} />
           </div>
         </section>
 

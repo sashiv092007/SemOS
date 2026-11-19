@@ -30,6 +30,7 @@ export type Slot = Assignment & {
 
 const DAY = 86_400_000;
 const KEY = "semos.plan.v1";
+const STAMP_KEY = "semos.plan.updated"; // ms epoch of the last change, used to sync with the account
 const EVENT = "semos:plan";
 
 export const deadlineOf = (plan: Plan) => plan.startAt + plan.days * DAY;
@@ -97,12 +98,17 @@ export function formatSpan(ms: number): string {
 let cachedRaw: string | null | undefined;
 let cachedPlan: Plan | null = null;
 
+/** The plan if `p` has the right shape, else null. */
+export function validPlan(p: unknown): Plan | null {
+  const q = p as Plan | null;
+  if (typeof q?.startAt !== "number" || typeof q?.days !== "number" || !Array.isArray(q?.items)) return null;
+  return q;
+}
+
 function parse(raw: string | null): Plan | null {
   if (!raw) return null;
   try {
-    const p = JSON.parse(raw);
-    if (typeof p?.startAt !== "number" || typeof p?.days !== "number" || !Array.isArray(p?.items)) return null;
-    return p as Plan;
+    return validPlan(JSON.parse(raw));
   } catch {
     return null;
   }
@@ -122,14 +128,44 @@ function readPlan(): Plan | null {
   return cachedPlan;
 }
 
-export function savePlan(plan: Plan | null) {
+const saveListeners = new Set<() => void>();
+
+/** Runs after every change the student makes (not after copies pulled from the cloud). */
+export function onPlanSaved(fn: () => void) {
+  saveListeners.add(fn);
+  return () => {
+    saveListeners.delete(fn);
+  };
+}
+
+/** The saved plan right now (null on the server or when there is none). */
+export const currentPlan = () => (typeof window === "undefined" ? null : readPlan());
+
+/** When the plan in this browser last changed, in ms (0 if unknown). */
+export function planStamp(): number {
+  try {
+    return Number(window.localStorage.getItem(STAMP_KEY)) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Save the plan in this browser. `stamp` is when the change happened (now by default);
+ * `fromCloud` marks a copy pulled from the account, so it is not sent back up.
+ */
+export function savePlan(plan: Plan | null, opts: { stamp?: number; fromCloud?: boolean } = {}) {
+  const stamp = opts.stamp ?? Date.now();
   try {
     if (plan) window.localStorage.setItem(KEY, JSON.stringify(plan));
     else window.localStorage.removeItem(KEY);
+    if (stamp) window.localStorage.setItem(STAMP_KEY, String(stamp));
+    else window.localStorage.removeItem(STAMP_KEY);
   } catch {
     // storage blocked: nothing to do
   }
   window.dispatchEvent(new Event(EVENT));
+  if (!opts.fromCloud) saveListeners.forEach((fn) => fn());
 }
 
 function subscribePlan(cb: () => void) {

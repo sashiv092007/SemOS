@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { deadlineOf, useNow, usePlan } from "@/lib/plan";
+import AccountButton from "./AccountButton";
 
 /*
  * Dashboard chrome shared by Mastersheet, Grade Analyzer and Note Builder.
@@ -97,6 +98,7 @@ export function ToolNav() {
             </span>
           </Link>
         ) : null}
+        <AccountButton />
         <Link href="/" aria-label="SemOS home" className={`grid h-10 w-10 place-items-center rounded-full bg-pink-200 text-pink-800 transition-colors duration-150 hover:bg-pink-300 ${FOCUS}`}>
           <House className="h-4 w-4" aria-hidden="true" />
         </Link>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import AccountButton from "./AccountButton";
 import {
   ArrowDown,
   ArrowUp,
@@ -158,6 +159,7 @@ function TopBar({ plan, now }: { plan: Plan | null | undefined; now: number }) {
             <span className="tabular-nums">{left > 0 ? `${d}d ${String(h).padStart(2, "0")}h left` : "Deadline passed"}</span>
           </span>
         ) : null}
+        <AccountButton />
         <Link href="/" aria-label="SemOS home" className={`grid h-10 w-10 place-items-center rounded-full bg-pink-200 text-pink-800 transition-colors duration-150 hover:bg-pink-300 ${FOCUS}`}>
           <House className="h-4 w-4" aria-hidden="true" />
         </Link>
