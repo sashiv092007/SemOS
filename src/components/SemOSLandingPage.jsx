@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, FileDown, Menu, Share2, X } from "lucide-react";
 import SemosShowcase from "./SemosShowcase";
+import Hourglass3D from "./Hourglass3D";
 import SemesterCountdown from "./SemesterCountdown";
 import { Backdrop, BADGE, CARD, Glow, PANEL } from "./ui";
 
@@ -330,7 +331,7 @@ function Hero() {
               aria-hidden="true"
               className="pointer-events-none absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/20 blur-2xl"
             />
-            <SandTimer />
+            <Hourglass3D className="relative h-72 w-full sm:h-80" fallback={<SandTimer />} />
           </div>
 
           <SemesterCountdown className="mt-4 w-full max-w-sm" />

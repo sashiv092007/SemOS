@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { triggerSweep } from "@/lib/sweep";
+import Lazy3D from "./three/Lazy3D";
 import { BADGE, CARD_ACTIVE, FIELD, Glow, LABEL, PANEL, WindowBar } from "./ui";
 import { BookOpen, ChevronDown, FileText, Loader2, ScrollText, Sparkles, Upload, X } from "lucide-react";
+
+const TopicOrbitScene = dynamic(() => import("./three/TopicOrbitScene"), { ssr: false });
 
 /* ------------------------------------------------------------------ */
 /*  Reference data                                                     */
@@ -665,6 +670,13 @@ export default function MastersheetGenerator() {
   const generating = ai.status === "loading";
   const generatedAt = ai.at;
   const sheet = deriveSheet({ topics, notes, pyqs, prioritize, ai: ai.data });
+
+  // Topic tags with the importance the AI gave them (null until rated).
+  const orbitTopics = topics.map((name) => {
+    const rated = ai.data?.topics?.find((t) => t.term.toLowerCase() === name.toLowerCase());
+    return { name, importance: rated && Number.isFinite(rated.importance) ? rated.importance : null, why: rated?.why ?? "" };
+  });
+  const ratedTopics = orbitTopics.filter((t) => t.importance !== null).sort((a, b) => b.importance - a.importance);
   const markStale = () => setAi((a) => (a.data ? { ...a, stale: true } : a));
 
   /** Send the files and settings to the server and show what the AI wrote. */
@@ -679,6 +691,7 @@ export default function MastersheetGenerator() {
     const controller = new AbortController();
     request.current = controller;
     setError("");
+    triggerSweep();
     setAi((a) => ({ ...a, status: "loading", error: "" }));
 
     // With files attached, untouched sample values are left out so the AI reads them from the files.
@@ -752,10 +765,54 @@ export default function MastersheetGenerator() {
 
   return (
     <div className="mx-auto max-w-[100rem] px-4 py-8 sm:px-6 lg:py-10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
       <p className={BADGE}>Mastersheet generator</p>
       <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Build a last-minute mastersheet
       </h1>
+      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
+        Attach your notes and previous papers. SemOS picks the topics that matter and pulls out the formulas.
+      </p>
+        </div>
+        <div className="w-full shrink-0 md:w-[40rem]">
+          <Lazy3D
+            Scene={TopicOrbitScene}
+            props={{ topics: orbitTopics, files: notes.length + pyqs.length, generating }}
+            className="h-72 w-full md:h-80"
+          />
+          {/* Legend for the orbit (also the text alternative to the 3D view) */}
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-slate-500">
+            {ratedTopics.length ? (
+              <>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" /> Must know 8-10
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" /> Important 5-7
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-cyan-400" /> Minor 1-4
+                </span>
+                <span className="normal-case tracking-normal text-slate-500">Closer to the core = more important</span>
+              </>
+            ) : (
+              <span className="normal-case tracking-normal">
+                {generating ? "Rating topics from your files…" : "Attach notes, PYQs or a CDP and AI rates each topic's importance."}
+              </span>
+            )}
+          </div>
+          {ratedTopics.length ? (
+            <ol className="sr-only">
+              {ratedTopics.map((t) => (
+                <li key={t.name}>
+                  {t.name}: importance {t.importance} out of 10{t.why ? `, ${t.why}` : ""}
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </div>
+      </div>
 
       <div className="mt-7 grid items-start gap-6 xl:grid-cols-[2fr_3fr]">
         {/* LEFT 40%: configuration and sources */}
@@ -800,10 +857,10 @@ export default function MastersheetGenerator() {
                 <UploadZone
                   id="notes-upload"
                   icon={BookOpen}
-                  title="Upload Notes / Textbooks / Slides"
+                  title="Upload Notes / Textbooks / Slides / CDP"
                   tag="Optional"
                   tagTone="border-slate-700 text-slate-400"
-                  hint="AI reads these, picks the important topics and pulls out the formulas."
+                  hint="AI reads these, rates how important each topic is and pulls out the formulas. A CDP or syllabus adds weightage."
                   accept=".pdf,.png,.jpg,.jpeg,.webp"
                   extensions={[".pdf", ".png", ".jpg", ".jpeg", ".webp"]}
                   files={notes}

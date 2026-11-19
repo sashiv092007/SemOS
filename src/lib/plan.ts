@@ -4,7 +4,13 @@ import { useSyncExternalStore } from "react";
 
 /* ---------- Types ---------- */
 
-export type Assignment = { id: string; name: string; hours: number; done: boolean };
+export type Assignment = {
+  id: string;
+  name: string;
+  hours: number;
+  done: boolean;
+  doneAt?: number; // ms epoch, when it was ticked off
+};
 
 export type Plan = {
   startAt: number; // ms epoch, when the timer started

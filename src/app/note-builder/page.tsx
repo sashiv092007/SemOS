@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import NoteBuilder from "@/components/NoteBuilder";
 import { Navbar } from "@/components/SemOSLandingPage";
+import AmbientGrid3D from "@/components/AmbientGrid3D";
 import ToolTabs from "@/components/ToolTabs";
 import { Backdrop } from "@/components/ui";
 
@@ -12,6 +13,7 @@ export default function NoteBuilderPage() {
       <Navbar />
       <main className="relative isolate">
         <Backdrop />
+        <AmbientGrid3D />
         <ToolTabs wide />
         <NoteBuilder />
       </main>

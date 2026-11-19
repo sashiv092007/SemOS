@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { triggerSweep } from "@/lib/sweep";
+import Lazy3D from "./three/Lazy3D";
 import {
   ArrowRight,
   Check,
@@ -16,6 +19,8 @@ import {
   Zap,
 } from "lucide-react";
 import { AppWindow, BADGE, BTN_PRIMARY as PRIMARY, CARD, FIELD as INPUT, Glow, LABEL, ScanLine as Laser } from "./ui";
+
+const TargetScene = dynamic(() => import("./three/TargetScene"), { ssr: false });
 
 /* ------------------------------------------------------------------ */
 /*  Grade maths (pure functions)                                       */
@@ -517,6 +522,7 @@ export default function GradeAnalyzer() {
     if (!(Number.isInteger(n) && n >= 1 && n <= 12)) return setStepError("Enter a whole number of subjects from 1 to 12.");
     setStepError("");
     setRows((rs) => Array.from({ length: n }, (_, i) => rs[i] ?? blankRow()));
+    triggerSweep();
     setStep((s) => Math.max(s, 2));
   };
 
@@ -584,6 +590,8 @@ export default function GradeAnalyzer() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
       <p className={BADGE}>Grade analyzer</p>
       <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Find the marks you need for your target
@@ -592,6 +600,15 @@ export default function GradeAnalyzer() {
         Enter your marks so far and what is still to come. SemOS works out the minimum you need in each subject and
         where your study time pays off most.
       </p>
+        </div>
+        <Lazy3D Scene={TargetScene} props={{
+            target: targetOk ? t : 0,
+            subjects: subjects.map((s) => ({
+              label: s.name.split(/[\s-]+/)[0].slice(0, 8),
+              pct: (s.scored / s.total) * 100,
+            })),
+          }} className="h-52 w-full shrink-0 md:h-56 md:w-[30rem]" />
+      </div>
 
       <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* LEFT: step-by-step input */}
@@ -684,7 +701,14 @@ export default function GradeAnalyzer() {
                   Add subject
                 </button>
                 {step === 2 ? (
-                  <button type="button" onClick={() => setStep(3)} className={PRIMARY}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerSweep();
+                      setStep(3);
+                    }}
+                    className={PRIMARY}
+                  >
                     Continue to Evaluation Pattern
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </button>

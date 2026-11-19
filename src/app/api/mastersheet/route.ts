@@ -6,7 +6,6 @@
  * The API key stays on the server. Set GEMINI_API_KEY in .env.local.
  */
 
-export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
@@ -38,8 +37,13 @@ const SCHEMA = {
           term: { type: "string", description: "Short topic name, at most 5 words." },
           definition: { type: "string", description: "A 2-mark answer: one or two sentences a student can reproduce in an exam." },
           points: { type: "array", items: { type: "string" }, description: "2 to 3 short revision notes on this topic." },
+          importance: {
+            type: "integer",
+            description: "Exam importance from 1 (minor) to 10 (certain to be asked, high marks).",
+          },
+          why: { type: "string", description: "Why it got that score, at most 8 words, e.g. 'asked in 3 of 4 PYQs'." },
         },
-        required: ["term", "definition", "points"],
+        required: ["term", "definition", "points", "importance", "why"],
       },
     },
     formulas: {
@@ -69,7 +73,7 @@ const SCHEMA = {
 };
 
 type Formula = { name: string; expr: string; note: string; source: "document" | "ai" };
-type Topic = { term: string; definition: string; points: string[] };
+type Topic = { term: string; definition: string; points: string[]; importance: number; why: string };
 
 function buildPrompt(o: {
   subject: string;
@@ -83,7 +87,7 @@ function buildPrompt(o: {
   return [
     "You are building a one-page last-minute exam revision sheet for an Indian university engineering student.",
     hasFiles
-      ? `Attached: ${o.notesCount} file(s) of notes, textbook pages or slides, followed by ${o.pyqCount} previous-semester question paper(s).`
+      ? `Attached: ${o.notesCount} file(s) of notes, textbook pages, slides or a course delivery plan (CDP) / syllabus, followed by ${o.pyqCount} previous-semester question paper(s).`
       : "No files are attached. Work from the subject and topics below using standard textbook knowledge.",
     o.subject ? `Subject given by the student: ${o.subject}.` : "The student did not name the subject. Detect it from the files.",
     o.unit ? `Unit or focus given by the student: ${o.unit}.` : "",
@@ -95,6 +99,7 @@ function buildPrompt(o: {
     "Do this:",
     "1. Pick the 5 to 8 topics that matter most for the exam. Prefer topics the material spends the most space on and, when previous papers are attached, topics those papers ask about repeatedly.",
     "2. For each topic write a 2-mark definition and 2 to 3 short revision notes. Use the wording of the uploaded material where it is correct.",
+    "   Rate each topic's exam importance from 1 to 10 using, in this order: how often previous papers ask it and for how many marks; the weightage or hours a CDP or syllabus gives it; how much space the notes spend on it. Give a short reason (at most 8 words). List topics from most to least important.",
     "3. Formulas: list every important formula that appears in the uploaded files, each with source \"document\". Copy them accurately.",
     "4. If the uploaded files contain no formulas at all (or no files are attached), supply the standard formulas for these topics yourself, up to 6, each with source \"ai\". Never mark a formula \"document\" unless it is actually in the files. If the subject truly has no formulas, return an empty list.",
     "5. pyqInsights: only if previous papers are attached, otherwise an empty list.",
@@ -126,8 +131,11 @@ function clean(raw: unknown) {
       term: str(t?.term, 80),
       definition: str(t?.definition, 600),
       points: (Array.isArray(t?.points) ? t.points : []).map((p: unknown) => str(p, 300)).filter(Boolean).slice(0, 4),
+      importance: Math.min(10, Math.max(1, Math.round(Number(t?.importance)) || 5)),
+      why: str(t?.why, 80),
     }))
     .filter((t: Topic) => t.term && t.definition)
+    .sort((a: Topic, b: Topic) => b.importance - a.importance)
     .slice(0, 10);
   const formulas: Formula[] = (Array.isArray(r.formulas) ? r.formulas : [])
     .map((f: Record<string, unknown>) => ({

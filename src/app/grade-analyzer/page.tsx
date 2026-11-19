@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import GradeAnalyzer from "@/components/GradeAnalyzer";
 import { Navbar } from "@/components/SemOSLandingPage";
+import AmbientGrid3D from "@/components/AmbientGrid3D";
 import ToolTabs from "@/components/ToolTabs";
 import { Backdrop } from "@/components/ui";
 
@@ -12,6 +13,7 @@ export default function GradeAnalyzerPage() {
       <Navbar />
       <main className="relative isolate">
         <Backdrop />
+        <AmbientGrid3D />
         <ToolTabs />
         <GradeAnalyzer />
       </main>

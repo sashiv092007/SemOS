@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { triggerSweep } from "@/lib/sweep";
+import Lazy3D from "./three/Lazy3D";
+import type { WorkloadProps } from "./three/WorkloadScene";
 import { Check, Plus, Trash2 } from "lucide-react";
 import {
   buildSchedule,
@@ -15,6 +19,9 @@ import {
   type Slot,
 } from "@/lib/plan";
 import { AppWindow, BADGE, CARD, FIELD as INPUT, LABEL } from "./ui";
+import DailyProgressChart from "./DailyProgressChart";
+
+const WorkloadScene = dynamic(() => import("./three/WorkloadScene"), { ssr: false });
 
 type Row = { id: string; name: string; hours: string; done: boolean };
 
@@ -32,7 +39,7 @@ const fmtDate = (ms: number) =>
 
 /* ---------- Form ---------- */
 
-function PlanForm({ plan }: { plan: Plan | null }) {
+function PlanForm({ plan, onDraft }: { plan: Plan | null; onDraft: (draft: WorkloadProps) => void }) {
   const [days, setDays] = useState(plan ? String(plan.days) : "7");
   const [rows, setRows] = useState<Row[]>(
     plan
@@ -40,6 +47,16 @@ function PlanForm({ plan }: { plan: Plan | null }) {
       : [blankRow(), blankRow(), blankRow()],
   );
   const [error, setError] = useState("");
+
+  // Share what is being typed with the 3D header, live.
+  useEffect(() => {
+    onDraft({
+      days: Math.max(0, Number(days) || 0),
+      items: rows
+        .map((r) => ({ name: r.name.trim(), hours: Number(r.hours) }))
+        .filter((r) => Number.isFinite(r.hours) && r.hours > 0),
+    });
+  }, [days, rows, onDraft]);
 
   const patch = (id: string, change: Partial<Row>) =>
     setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...change } : r)));
@@ -68,10 +85,17 @@ function PlanForm({ plan }: { plan: Plan | null }) {
       }
     }
     setError("");
+    triggerSweep();
     savePlan({
       startAt: plan?.startAt ?? Date.now(),
       days: d,
-      items: filled.map((r) => ({ id: r.id, name: r.name.trim(), hours: Number(r.hours), done: r.done })),
+      items: filled.map((r) => ({
+        id: r.id,
+        name: r.name.trim(),
+        hours: Number(r.hours),
+        done: r.done,
+        doneAt: r.done ? plan?.items.find((a) => a.id === r.id)?.doneAt : undefined,
+      })),
     });
   }
 
@@ -195,7 +219,12 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
   const progress = Math.min(100, Math.max(0, ((now - plan.startAt) / (deadline - plan.startAt)) * 100));
 
   const toggle = (id: string) =>
-    savePlan({ ...plan, items: plan.items.map((a) => (a.id === id ? { ...a, done: !a.done } : a)) });
+    savePlan({
+      ...plan,
+      items: plan.items.map((a) =>
+        a.id === id ? { ...a, done: !a.done, doneAt: a.done ? undefined : Date.now() } : a,
+      ),
+    });
 
   return (
     <div className="space-y-4">
@@ -223,6 +252,8 @@ function Schedule({ plan, now: clock }: { plan: Plan; now: number }) {
           ) : null}
         </div>
       </section>
+
+      <DailyProgressChart plan={plan} now={now} />
 
       {/* Order */}
       <section className={CARD}>
@@ -305,9 +336,12 @@ export default function RoadmapPlanner() {
   const plan = usePlan();
   const now = useNow();
   const ready = plan !== undefined && now !== 0;
+  const [draft, setDraft] = useState<WorkloadProps>({ days: 7, items: [] });
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
       <p className={BADGE}>Roadmap</p>
       <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Schedule your assignments
@@ -316,13 +350,16 @@ export default function RoadmapPlanner() {
         Tell SemOS what is due and how long you have. It orders the work largest first, splits your time between
         the assignments, and starts the countdown.
       </p>
+        </div>
+        <Lazy3D Scene={WorkloadScene} props={draft} className="h-52 w-full shrink-0 md:h-56 md:w-[30rem]" />
+      </div>
 
       {!ready ? (
         <p className="mt-8 font-mono text-xs text-slate-500">Loading…</p>
       ) : (
         <div className="mt-8 grid items-start gap-5 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
           {/* key: reset the form when a plan is cleared or first created */}
-          <PlanForm key={plan ? plan.startAt : "new"} plan={plan} />
+          <PlanForm key={plan ? plan.startAt : "new"} plan={plan} onDraft={setDraft} />
           <AppWindow
             path="roadmap/schedule.timeline"
             className="min-w-0"

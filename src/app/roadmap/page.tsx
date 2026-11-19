@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import RoadmapPlanner from "@/components/RoadmapPlanner";
 import { Navbar } from "@/components/SemOSLandingPage";
+import AmbientGrid3D from "@/components/AmbientGrid3D";
 import ToolTabs from "@/components/ToolTabs";
 import { Backdrop } from "@/components/ui";
 
@@ -12,6 +13,7 @@ export default function RoadmapPage() {
       <Navbar />
       <main className="relative isolate">
         <Backdrop />
+        <AmbientGrid3D />
         <ToolTabs />
         <RoadmapPlanner />
       </main>

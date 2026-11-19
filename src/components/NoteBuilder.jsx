@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { triggerSweep } from "@/lib/sweep";
+import Lazy3D from "./three/Lazy3D";
 import {
   Check,
   ChevronDown,
@@ -20,6 +23,8 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { BADGE, CARD_ACTIVE, Glow, LABEL, PAPER_SHADOW, WindowBar } from "./ui";
+
+const MessyCleanScene = dynamic(() => import("./three/MessyCleanScene"), { ssr: false });
 
 /* ------------------------------------------------------------------ */
 /*  Sample note material (stands in for OCR output)                    */
@@ -435,6 +440,21 @@ export default function NoteBuilder() {
   }, []);
 
   const pages = status === "complete" ? buildPages(mode) : [];
+
+  // First page of the notes, simplified for the 3D before/after preview.
+  const previewPage = useMemo(() => {
+    const first = buildPages(mode)[0];
+    const blocks = first.blocks.flatMap((b) => {
+      if (b.type === "heading") return [{ type: "heading", text: b.text }];
+      if (b.type === "def" || b.type === "para") return [{ type: "text", text: plain(b.text) }];
+      if (b.type === "formula") return [{ type: "formula", text: b.expr, label: b.label }];
+      if (b.type === "bullets") return b.items.map((it) => ({ type: "bullet", text: plain(it) }));
+      if (b.type === "qa") return [{ type: "heading", text: `Q. ${b.q}` }, { type: "text", text: `A. ${b.a}` }];
+      return [];
+    });
+    return { title: first.title, subtitle: first.subtitle, blocks };
+  }, [mode]);
+  const beforeImage = files.find((f) => f.url)?.url ?? null;
   const total = pages.length;
   const page = Math.min(currentPage, Math.max(1, total));
 
@@ -474,6 +494,7 @@ export default function NoteBuilder() {
       return;
     }
     setError("");
+    triggerSweep();
     setStatus("processing");
     setProgress(0);
     let value = 0;
@@ -554,6 +575,8 @@ export default function NoteBuilder() {
 
   return (
     <div className="mx-auto max-w-[100rem] px-4 py-8 sm:px-6 lg:py-10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
       <p className={BADGE}>Note builder</p>
       <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
         Turn messy sources into clean notes
@@ -562,6 +585,13 @@ export default function NoteBuilder() {
         Textbook photos, WhatsApp board screenshots, lecture slides and PDFs go in. Structured, page-by-page notes
         come out.
       </p>
+        </div>
+        <Lazy3D
+          Scene={MessyCleanScene}
+          props={{ beforeImage, status, progress, page: previewPage }}
+          className="h-72 w-full shrink-0 md:h-80 md:w-[40rem]"
+        />
+      </div>
 
       <div className="mt-7 grid items-start gap-6 xl:grid-cols-[35fr_65fr]">
         {/* LEFT 35%: upload and processing */}
