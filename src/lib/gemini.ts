@@ -82,12 +82,12 @@ function extractText(body: unknown): string | null {
 const short = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 /**
- * Models to try, in order. When one is overloaded (503) or out of free quota (429),
- * the next one is used. GEMINI_FALLBACK_MODELS (comma separated) overrides the list.
+ * Models in order of preference. GEMINI_FALLBACK_MODELS (comma separated) overrides the backups.
+ * The lite models come early because they keep answering when Google's main models are overloaded.
  */
 const MODELS = [
   GEMINI_MODEL,
-  ...(process.env.GEMINI_FALLBACK_MODELS ?? "gemini-3.7-flash,gemini-flash-latest,gemini-3.5-flash-lite,gemini-3.1-flash-lite")
+  ...(process.env.GEMINI_FALLBACK_MODELS ?? "gemini-3.5-flash-lite,gemini-3.7-flash,gemini-3.1-flash-lite")
     .split(",")
     .map((m) => m.trim())
     .filter(Boolean),
@@ -95,67 +95,105 @@ const MODELS = [
 
 const BUSY = new Set([429, 500, 503]);
 
-// A model that hangs must not use up the whole request: cap each attempt, except the last.
-const FIRST_TRY_MS = 28_000;
-const FALLBACK_TRY_MS = 20_000;
+/** If the current models have not answered after this long, the next model starts as well. */
+const HEAD_START_MS = 12_000;
+
+type Outcome =
+  | { ok: true; data: unknown; model: string }
+  | { ok: false; kind: "busy" | "quota" | "slow" | "missing" | "bad_output"; error?: AiError }
+  | { ok: false; kind: "fatal"; error: AiError };
 
 /**
  * Send files and a prompt to Gemini and get back JSON matching `schema`, plus the model that answered.
- * A busy, slow or unavailable model hands over to the next one. All attempts share `timeoutMs`.
+ *
+ * The preferred model starts first. If it fails, or has not answered within HEAD_START_MS, the next
+ * model starts too; the first valid answer wins and the other requests are cancelled. So a healthy
+ * main model answers on its own, and an overloaded one is covered by a backup within seconds.
  * Throws AiError with a student-friendly message on every failure.
  */
 export async function generateJson<T = unknown>(parts: Part[], schema: object, timeoutMs = 55_000): Promise<{ data: T; model: string }> {
   const key = requireKey();
   const deadline = Date.now() + timeoutMs;
-  const payload = (model: string) =>
-    JSON.stringify({ model, input: parts, response_format: { type: "text", mime_type: "application/json", schema } });
+  const all = new AbortController();
+  const stopAll = setTimeout(() => all.abort(), timeoutMs);
 
-  let lastBusy = "";
-  for (let i = 0; i < MODELS.length; i++) {
-    const model = MODELS[i];
-    const left = deadline - Date.now();
-    if (left < 3_000) break;
-    const isLast = i === MODELS.length - 1;
-    const budget = isLast ? left : Math.min(left, i === 0 ? FIRST_TRY_MS : FALLBACK_TRY_MS);
-
+  async function attempt(model: string): Promise<Outcome> {
     let res: Response;
     try {
       res = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": key, "Api-Revision": API_REVISION },
-        body: payload(model),
-        signal: AbortSignal.timeout(budget),
+        body: JSON.stringify({ model, input: parts, response_format: { type: "text", mime_type: "application/json", schema } }),
+        signal: all.signal,
       });
     } catch {
-      lastBusy = "slow"; // timed out or network hiccup: let the next model try
-      continue;
+      return { ok: false, kind: "slow" };
     }
-
     const body = await res.json().catch(() => null);
     if (!res.ok) {
       const detail = short((body as { error?: { message?: unknown } })?.error?.message, 300);
-      if (BUSY.has(res.status)) {
-        lastBusy = res.status === 429 ? "quota" : "busy";
-        continue;
+      if (BUSY.has(res.status)) return { ok: false, kind: res.status === 429 ? "quota" : "busy" };
+      if (res.status === 404) return { ok: false, kind: "missing" };
+      if (res.status === 400 && /api key/i.test(detail)) {
+        return { ok: false, kind: "fatal", error: new AiError(502, "The Gemini API key is not valid. Check GEMINI_API_KEY.", "bad_key") };
       }
-      if (res.status === 404) continue; // model not available on this key
-      if (res.status === 400 && /api key/i.test(detail)) throw new AiError(502, "The Gemini API key is not valid. Check GEMINI_API_KEY.", "bad_key");
-      if (res.status === 401 || res.status === 403) throw new AiError(502, `The Gemini API key was rejected. ${detail}`, "bad_key");
-      throw new AiError(502, `The AI service returned an error (${res.status}). ${detail}`);
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, kind: "fatal", error: new AiError(502, `The Gemini API key was rejected. ${detail}`, "bad_key") };
+      }
+      return { ok: false, kind: "bad_output", error: new AiError(502, `The AI service returned an error (${res.status}). ${detail}`) };
     }
-
     const text = extractText(body);
-    if (!text) throw new AiError(502, "The AI returned no content. It may have declined this file; try another.");
+    if (!text) {
+      return { ok: false, kind: "bad_output", error: new AiError(502, "The AI returned no content. It may have declined this file; try another.") };
+    }
     try {
-      return { data: JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")) as T, model };
+      return { ok: true, data: JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, "")), model };
     } catch {
-      throw new AiError(502, "The AI answer could not be understood. Try again.");
+      return { ok: false, kind: "bad_output", error: new AiError(502, "The AI answer could not be understood. Try again.") };
     }
   }
 
-  if (lastBusy === "slow") throw new AiError(504, "The AI service did not answer in time. Try again, or use smaller files.", "timeout");
+  const running = new Map<number, Promise<{ id: number; out: Outcome }>>();
+  let next = 0;
+  const launch = () => {
+    if (next >= MODELS.length || Date.now() > deadline - 2_000) return;
+    const id = next++;
+    running.set(id, attempt(MODELS[id]).then((out) => ({ id, out })));
+  };
 
-  if (lastBusy === "quota") throw new AiError(429, "The free AI quota is used up for now. Wait a minute and try again.", "quota");
-  if (lastBusy === "busy") throw new AiError(503, "The AI service is very busy right now. Try again in a minute.", "busy");
+  const seen = new Set<string>();
+  let lastError: AiError | undefined;
+  try {
+    launch();
+    while (running.size > 0) {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const headStart =
+        next < MODELS.length ? new Promise<"head-start">((r) => (timer = setTimeout(() => r("head-start"), HEAD_START_MS))) : null;
+      const winner = await Promise.race(headStart ? [...running.values(), headStart] : [...running.values()]);
+      clearTimeout(timer);
+
+      if (winner === "head-start") {
+        launch();
+        continue;
+      }
+      running.delete(winner.id);
+      const { out } = winner;
+      if (out.ok) return { data: out.data as T, model: out.model };
+      if (out.kind === "fatal") throw out.error;
+      seen.add(out.kind);
+      if (out.error) lastError = out.error;
+      launch(); // this model failed: start the next one straight away
+    }
+  } finally {
+    clearTimeout(stopAll);
+    all.abort(); // cancel any requests still running
+  }
+
+  if (seen.has("bad_output") && lastError) throw lastError;
+  if (seen.has("quota") && !seen.has("busy") && !seen.has("slow")) {
+    throw new AiError(429, "The free AI quota is used up for now. Wait a minute and try again.", "quota");
+  }
+  if (seen.has("busy")) throw new AiError(503, "The AI service is very busy right now. Try again in a minute.", "busy");
+  if (seen.has("slow")) throw new AiError(504, "The AI service did not answer in time. Try again, or use smaller files.", "timeout");
   throw new AiError(502, `None of the configured AI models are available on this key (${MODELS.join(", ")}).`, "bad_model");
 }

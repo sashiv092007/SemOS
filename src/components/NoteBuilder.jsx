@@ -132,6 +132,9 @@ const TOPICS = [
   },
 ];
 
+/** Built-in example, shown by "See sample notes" and before any real build. */
+const SAMPLE = { subject: SUBJECT, unit: UNIT, topics: TOPICS };
+
 const MODES = [
   { id: "exam", label: "Exam Ready", hint: "Bullet Points + Keywords" },
   { id: "detailed", label: "Detailed Summary", hint: "Short paragraphs per topic" },
@@ -140,14 +143,15 @@ const MODES = [
 
 const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
 
-/** The paginated note contents for a formatting depth. */
-function buildPages(mode) {
+/** The paginated note contents for a formatting depth. `data` is the AI's notes or the sample. */
+function buildPages(mode, data = SAMPLE) {
+  const unit = data.unit || data.subject || "Your notes";
   if (mode === "qa") {
-    const all = TOPICS.flatMap((t) => t.qa.map((x) => ({ type: "qa", topic: t.name, ...x })));
-    return chunk(all, 4).map((blocks) => ({ title: UNIT, subtitle: "2-Mark Question & Answer Bank", blocks }));
+    const all = data.topics.flatMap((t) => t.qa.map((x) => ({ type: "qa", topic: t.name, ...x })));
+    return chunk(all, 4).map((blocks) => ({ title: unit, subtitle: "2-Mark Question & Answer Bank", blocks }));
   }
-  return chunk(TOPICS, 2).map((group) => ({
-    title: UNIT,
+  return chunk(data.topics, 2).map((group) => ({
+    title: unit,
     subtitle: group.map((t) => t.name).join(" · "),
     blocks: group.flatMap((t) => [
       { type: "heading", text: t.name },
@@ -159,6 +163,14 @@ function buildPages(mode) {
 }
 
 const plain = (s) => s.replace(/\*\*/g, "");
+
+/** "Unit 3 — Process Synchronization" -> "unit-3-process-synchronization" */
+const slug = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "notes";
 
 function pageToText(page, index) {
   const lines = [`Page ${index + 1}: ${page.title}`, page.subtitle, ""];
@@ -185,7 +197,7 @@ const pdfSafe = (s) =>
     .replace(/·/g, "|")
     .replace(/[^\x20-\x7E\n]/g, "");
 
-async function buildPdf(pages) {
+async function buildPdf(pages, subject = SUBJECT) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const W = doc.internal.pageSize.getWidth();
@@ -219,7 +231,7 @@ async function buildPdf(pages) {
       doc.addPage();
       y = M;
     }
-    text(`SEMOS | ${SUBJECT}`, { size: 8, color: [100, 116, 139], gap: 4 });
+    text(`SEMOS | ${subject || "Notes"}`, { size: 8, color: [100, 116, 139], gap: 4 });
     text(`Page ${i + 1}: ${page.title}`, { size: 16, style: "bold", color: [15, 23, 42], gap: 2 });
     text(page.subtitle, { size: 10, style: "italic", color: [71, 85, 105], gap: 6 });
     doc.setDrawColor(15, 23, 42);
@@ -354,7 +366,7 @@ function Block({ block }) {
   }
 }
 
-function PaperPage({ page, index, total, zoom }) {
+function PaperPage({ page, index, total, zoom, subject = SUBJECT }) {
   return (
     <article
       style={{ zoom }}
@@ -362,7 +374,7 @@ function PaperPage({ page, index, total, zoom }) {
     >
       <header className="border-b-4 border-double border-slate-900 pb-3">
         <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">
-          SEMOS <span className="text-slate-400">/</span> {SUBJECT}
+          SEMOS <span className="text-slate-400">/</span> {subject || "Notes"}
         </p>
         <h2 className="mt-2 text-xl font-bold leading-tight tracking-tight sm:text-2xl">
           Page {index + 1}: {page.title}
@@ -408,10 +420,12 @@ function Toggle({ checked, onChange, labelId }) {
 
 export default function NoteBuilder() {
   // left column
-  const [files, setFiles] = useState([]); // { id, name, size, kind, url }
+  const [files, setFiles] = useState([]); // { id, name, size, kind, url, file }
   const [mode, setMode] = useState("exam");
   const [autoClean, setAutoClean] = useState(true);
   const [status, setStatus] = useState("idle"); // idle | processing | complete
+  const [notes, setNotes] = useState(null); // notes from the AI; null = the built-in sample
+  const request = useRef(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
@@ -437,15 +451,17 @@ export default function NoteBuilder() {
       document.removeEventListener("fullscreenchange", onFs);
       clearInterval(t.progress);
       clearTimeout(t.toast);
+      request.current?.abort();
       u.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
 
-  const pages = status === "complete" ? buildPages(mode) : [];
+  const data = notes ?? SAMPLE;
+  const pages = status === "complete" ? buildPages(mode, data) : [];
 
   // First page of the notes, simplified for the 3D before/after preview.
   const previewPage = useMemo(() => {
-    const first = buildPages(mode)[0];
+    const first = buildPages(mode, data)[0];
     const blocks = first.blocks.flatMap((b) => {
       if (b.type === "heading") return [{ type: "heading", text: b.text }];
       if (b.type === "def" || b.type === "para") return [{ type: "text", text: plain(b.text) }];
@@ -455,7 +471,7 @@ export default function NoteBuilder() {
       return [];
     });
     return { title: first.title, subtitle: first.subtitle, blocks };
-  }, [mode]);
+  }, [mode, data]);
   const beforeImage = files.find((f) => f.url)?.url ?? null;
   const total = pages.length;
   const page = Math.min(currentPage, Math.max(1, total));
@@ -474,7 +490,7 @@ export default function NoteBuilder() {
         const isImage = IMAGE_EXT.includes(ext);
         const url = isImage ? URL.createObjectURL(f) : null;
         if (url) urls.current.add(url);
-        next.push({ id: `${f.name}-${f.size}-${f.lastModified}`, name: f.name, size: f.size, kind: isImage ? "IMG" : "PDF", url });
+        next.push({ id: `${f.name}-${f.size}-${f.lastModified}`, name: f.name, size: f.size, kind: isImage ? "IMG" : "PDF", url, file: f });
       }
     }
     setError(bad.join(". "));
@@ -489,9 +505,29 @@ export default function NoteBuilder() {
   };
 
   /* ----- processing ----- */
-  const startBuild = (requireFiles) => {
+  // Progress bar: real builds creep towards 90% while the AI works, the sample fills quickly.
+  const runProgress = (step, cap, onFull) => {
+    let value = 0;
+    clearInterval(timers.current.progress);
+    timers.current.progress = setInterval(() => {
+      value = Math.min(cap, value + step * (1 - value / 110));
+      setProgress(Math.round(value));
+      if (value >= cap && onFull) {
+        clearInterval(timers.current.progress);
+        onFull();
+      }
+    }, 100);
+  };
+  const finish = () => {
+    clearInterval(timers.current.progress);
+    setProgress(100);
+    setStatus("complete");
+    setCurrentPage(1);
+  };
+
+  const startBuild = async (useFiles) => {
     if (status === "processing") return;
-    if (requireFiles && files.length === 0) {
+    if (useFiles && files.length === 0) {
       setError("Add at least one photo, screenshot or PDF first");
       return;
     }
@@ -499,21 +535,42 @@ export default function NoteBuilder() {
     triggerSweep();
     setStatus("processing");
     setProgress(0);
-    let value = 0;
-    clearInterval(timers.current.progress);
-    timers.current.progress = setInterval(() => {
-      value += 4;
-      if (value >= 100) {
-        clearInterval(timers.current.progress);
-        setProgress(100);
-        setStatus("complete");
-        setCurrentPage(1);
-      } else {
-        setProgress(value);
-      }
-    }, 100);
+
+    if (!useFiles) {
+      setNotes(null);
+      runProgress(6, 100, finish);
+      return;
+    }
+
+    runProgress(1.2, 90);
+    request.current?.abort();
+    const controller = new AbortController();
+    request.current = controller;
+    const body = new FormData();
+    for (const f of files) body.append("files", f.file, f.name);
+    body.set("autoClean", String(autoClean));
+    try {
+      const res = await fetch("/api/notes", { method: "POST", body, signal: controller.signal });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json) throw new Error(json?.error || "The notes could not be built. Try again.");
+      setNotes({ subject: json.subject, unit: json.unit, topics: json.topics });
+      finish();
+      const issues = [...(json.unreadable ?? []), ...(json.skipped ?? []).map((n) => `${n} was skipped`)];
+      showToast(
+        issues.length
+          ? { kind: "error", text: `Built from ${json.filesRead} file(s). Note: ${issues.slice(0, 2).join("; ")}` }
+          : { kind: "done", text: `Built ${json.topics.length} topics from ${json.filesRead} file(s)` },
+        issues.length ? 6000 : 3000,
+      );
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      clearInterval(timers.current.progress);
+      setProgress(0);
+      setStatus(notes ? "complete" : "idle");
+      setError(err.message);
+    }
   };
-  const stage = progress < 60 ? "Extracting text via OCR..." : "Structuring pages...";
+  const stage = progress < 45 ? "Reading your files with AI..." : progress < 80 ? "Finding the topics..." : "Structuring pages...";
 
   /* ----- reader ----- */
   const goTo = (n) => {
@@ -566,7 +623,7 @@ export default function NoteBuilder() {
     showToast({ kind: "busy", text: "Preparing your PDF…" });
     try {
       // keep the spinner on screen long enough to be seen
-      await Promise.all([buildPdf(pages), new Promise((r) => setTimeout(r, 700))]);
+      await Promise.all([buildPdf(pages, data.subject), new Promise((r) => setTimeout(r, 700))]);
       showToast({ kind: "done", text: `Saved semos-notes.pdf (${total} pages)` }, 3000);
     } catch {
       showToast({ kind: "error", text: "The PDF could not be created. Try again." }, 4000);
@@ -817,7 +874,7 @@ export default function NoteBuilder() {
           className={`relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-slate-800/80 border-t-white/10 bg-slate-900/40 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_40px_-15px_rgba(0,0,0,0.7)] transition-all duration-300 hover:border-slate-700/80 hover:border-t-white/10 ${fullscreen ? "h-screen" : ""}`}
         >
           <WindowBar
-            path="notes/unit-3-process-synchronization.pdf"
+            path={`notes/${slug(data.unit || data.subject || "notes")}.pdf`}
             title="Interactive page viewer"
             right={total ? `${total} pages` : "Reader"}
           />
@@ -890,9 +947,9 @@ export default function NoteBuilder() {
             </div>
           </div>
 
-          {total ? (
+          {total && !notes ? (
             <p className="border-b border-slate-800 bg-amber-400/5 px-3 py-1.5 text-xs text-amber-300">
-              Sample notes. OCR is not connected yet, so uploaded files are not read.
+              Sample notes. Add your own photos or PDFs and press Clean &amp; Build Notes to get notes from them.
             </p>
           ) : null}
 
@@ -913,7 +970,7 @@ export default function NoteBuilder() {
                     aria-hidden={i !== page - 1}
                     className={`w-full shrink-0 overflow-x-auto px-3 py-6 sm:px-6 ${i === page - 1 ? "" : "h-0 overflow-hidden"}`}
                   >
-                    <PaperPage page={p} index={i} total={total} zoom={zoom} />
+                    <PaperPage page={p} index={i} total={total} zoom={zoom} subject={data.subject} />
                   </div>
                 ))}
               </div>
