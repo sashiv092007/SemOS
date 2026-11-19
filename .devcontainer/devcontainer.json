@@ -1,0 +1,43 @@
+{
+  // GitHub Codespaces setup for SemOS: installs packages, pulls the latest
+  // code, and starts the site on port 3000 automatically.
+  "name": "SemOS",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+
+  // First time the codespace is created.
+  "postCreateCommand": "npm ci --no-audit --no-fund",
+
+  // Every time the codespace starts: get the newest code from GitHub
+  // (skipped safely if you have unsaved local edits) and sync packages.
+  "postStartCommand": "git pull --ff-only origin main || echo 'Skipped git pull (local changes)'; npm install --no-audit --no-fund",
+
+  // Whenever you open the codespace: start the website.
+  "postAttachCommand": {
+    "website": "npm run dev"
+  },
+
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "SemOS website",
+      "onAutoForward": "openBrowser"
+    }
+  },
+
+  // Lets the Mastersheet AI work in the codespace. Add the key once at
+  // github.com/settings/codespaces -> Codespaces secrets.
+  "secrets": {
+    "GEMINI_API_KEY": {
+      "description": "Gemini API key used by the Mastersheet generator."
+    }
+  },
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    },
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"]
+    }
+  }
+}
