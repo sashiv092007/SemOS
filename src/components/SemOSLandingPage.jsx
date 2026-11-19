@@ -137,7 +137,7 @@ const CYCLE = "14s";
 const GLASS =
   "M48 38 H152 C152 92 106 118 106 140 C106 162 152 188 152 242 H48 C48 188 94 162 94 140 C94 118 48 92 48 38 Z";
 
-function SandTimer() {
+export function SandTimer() {
   const loop = { dur: CYCLE, repeatCount: "indefinite" };
 
   return (
@@ -456,7 +456,7 @@ function SheetHeading({ n, children }) {
   );
 }
 
-function DocumentSheet() {
+export function DocumentSheet() {
   return (
     <article className="border border-stone-300 bg-[#fbf9f1] px-5 py-7 font-serif text-slate-900 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] sm:px-10 sm:py-10 xl:px-32 xl:py-12">
       <header className="border-b-4 border-double border-slate-900 pb-4">
