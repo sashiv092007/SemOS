@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolBody, ToolHero } from "./ToolLayout";
+import { Target as TargetIcon, Scale, ListOrdered } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
@@ -589,28 +591,26 @@ export default function GradeAnalyzer() {
     subjects.length && targetOk ? analyze({ target: t, subjects, assessments: cleanAssessments, relative }) : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-      <p className={BADGE}>Grade analyzer</p>
-      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
-        Find the marks you need for your target
-      </h1>
-      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
-        Enter your marks so far and what is still to come. SemOS works out the minimum you need in each subject and
-        where your study time pays off most.
-      </p>
-        </div>
-        <Lazy3D Scene={TargetScene} props={{
+<>
+      <ToolHero
+        tag="CGPA planning · No sign-up"
+        title="Find The Marks You Need For Your Target"
+        text="Enter your marks so far and what is still to come. SemOS works out the minimum you need in each subject and where your study time pays off most."
+        cta="Set my target"
+        scene={<Lazy3D Scene={TargetScene} props={{
             target: targetOk ? t : 0,
             subjects: subjects.map((s) => ({
               label: s.name.split(/[\s-]+/)[0].slice(0, 8),
               pct: (s.scored / s.total) * 100,
             })),
-          }} className="h-52 w-full shrink-0 md:h-56 md:w-[30rem]" />
-      </div>
-
-      <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+          }} className="h-full w-full" />}
+        caption={null}
+        cards={[{ icon: TargetIcon, title: "Your target", text: "SGPA or CGPA out of 10" }, { icon: ListOrdered, title: "Per subject", text: "Minimum marks needed" }, { icon: Scale, title: "Relative grading", text: "Or absolute, your choice" }]}
+        stats={[{ value: "3 steps", label: "Target, marks, pattern" }, { value: "10.0", label: "Grade point scale" }, { value: "Live", label: "Projected SGPA" }, { value: "0", label: "Accounts needed" }]}
+      />
+      <ToolBody>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* LEFT: step-by-step input */}
         <div className="min-w-0 space-y-5">
           <StepCard n={1} title="Target and subject count" done={step > 1}>
@@ -942,5 +942,7 @@ export default function GradeAnalyzer() {
         </div>
       </div>
     </div>
+      </ToolBody>
+    </>
   );
 }

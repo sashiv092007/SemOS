@@ -9,7 +9,7 @@ const urbanist = Urbanist({ subsets: ["latin"], weight: ["400", "500", "600", "7
 
 export default function RoadmapPage() {
   return (
-    <div className={`${urbanist.className} min-h-screen bg-[#f4f5f7] text-slate-700`}>
+    <div className={`${urbanist.className} min-h-screen bg-[#faf5fb] text-slate-700`}>
       <RoadmapPlanner />
     </div>
   );

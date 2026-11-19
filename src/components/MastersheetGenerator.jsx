@@ -1,10 +1,12 @@
 "use client";
 
+import { ToolBody, ToolHero } from "./ToolLayout";
+import { Layers, FileStack, Printer } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
 import Lazy3D from "./three/Lazy3D";
-import { BADGE, CARD_ACTIVE, FIELD, Glow, LABEL, PANEL, WindowBar } from "./ui";
+import { CARD_ACTIVE, FIELD, Glow, LABEL, PANEL, WindowBar } from "./ui";
 import { BookOpen, ChevronDown, FileText, Loader2, ScrollText, Sparkles, Upload, X } from "lucide-react";
 
 const TopicOrbitScene = dynamic(() => import("./three/TopicOrbitScene"), { ssr: false });
@@ -764,24 +766,17 @@ export default function MastersheetGenerator() {
   };
 
   return (
-    <div className="mx-auto max-w-[100rem] px-4 py-8 sm:px-6 lg:py-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-      <p className={BADGE}>Mastersheet generator</p>
-      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
-        Build a last-minute mastersheet
-      </h1>
-      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
-        Attach your notes and previous papers. SemOS picks the topics that matter and pulls out the formulas.
-      </p>
-        </div>
-        <div className="w-full shrink-0 md:w-[40rem]">
-          <Lazy3D
+<>
+      <ToolHero
+        tag="Exam prep · One printable page"
+        title="Build Your Last-Minute Mastersheet"
+        text="Attach your notes and previous papers. SemOS picks the topics that matter and pulls out the formulas."
+        cta="Start building"
+        scene={<Lazy3D
             Scene={TopicOrbitScene}
             props={{ topics: orbitTopics, files: notes.length + pyqs.length, generating }}
-            className="h-72 w-full md:h-80"
-          />
-          {/* Legend for the orbit (also the text alternative to the 3D view) */}
+            className="h-full w-full" />}
+        caption={<>{/* Legend for the orbit (also the text alternative to the 3D view) */}
           <div className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest text-slate-500">
             {ratedTopics.length ? (
               <>
@@ -810,11 +805,13 @@ export default function MastersheetGenerator() {
                 </li>
               ))}
             </ol>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="mt-7 grid items-start gap-6 xl:grid-cols-[2fr_3fr]">
+          ) : null}</>}
+        cards={[{ icon: Layers, title: "Topics ranked", text: "Each one scored 1–10" }, { icon: FileStack, title: "Past papers", text: "Recurring questions found" }, { icon: Printer, title: "Print-ready", text: "Everything on one page" }]}
+        stats={[{ value: "1 page", label: "Whole unit, printable" }, { value: "1–10", label: "Importance per topic" }, { value: "10", label: "Files: notes + PYQs" }, { value: "3", label: "Readiness checks" }]}
+      />
+      <ToolBody>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[2fr_3fr]">
         {/* LEFT 40%: configuration and sources */}
         <form onSubmit={generate} noValidate className={`overflow-hidden ${CARD_ACTIVE}`}>
           <WindowBar path="mastersheet/sources.cfg" title="Configuration and source input" right="Input" />
@@ -976,7 +973,7 @@ export default function MastersheetGenerator() {
           {/*
             Container-query layout, so it adapts to the canvas width, not the screen:
             - narrow: found panel, score panel, then the sheet
-            - medium (36rem+): the two dark panels sit side by side and overlap the sheet's top edge
+            - medium (36rem+): the two panels sit side by side above the sheet
             - wide (48rem+): the panels float over the sheet's top-left corner and right edge
           */}
           <div className="@container">
@@ -995,7 +992,7 @@ export default function MastersheetGenerator() {
                 />
               </div>
 
-              <div className="mt-3 @min-[36rem]:-mt-10 @min-[48rem]:ml-[9.25rem] @min-[48rem]:mr-[10.25rem] @min-[48rem]:mt-0">
+              <div className="mt-4 @min-[48rem]:ml-[9.25rem] @min-[48rem]:mr-[10.25rem] @min-[48rem]:mt-0">
                 <DocumentSheet
                   subject={subject}
                   unit={unit}
@@ -1014,5 +1011,7 @@ export default function MastersheetGenerator() {
         </section>
       </div>
     </div>
+      </ToolBody>
+    </>
   );
 }

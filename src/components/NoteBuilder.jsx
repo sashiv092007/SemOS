@@ -1,5 +1,7 @@
 "use client";
 
+import { ToolBody, ToolHero } from "./ToolLayout";
+import { ListChecks, FileDown } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
@@ -22,7 +24,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from "lucide-react";
-import { BADGE, CARD_ACTIVE, Glow, LABEL, PAPER_SHADOW, WindowBar } from "./ui";
+import { CARD_ACTIVE, Glow, LABEL, PAPER_SHADOW, WindowBar } from "./ui";
 
 const MessyCleanScene = dynamic(() => import("./three/MessyCleanScene"), { ssr: false });
 
@@ -574,26 +576,23 @@ export default function NoteBuilder() {
   }
 
   return (
-    <div className="mx-auto max-w-[100rem] px-4 py-8 sm:px-6 lg:py-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-      <p className={BADGE}>Note builder</p>
-      <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-100 sm:text-3xl">
-        Turn messy sources into clean notes
-      </h1>
-      <p className="mt-2 max-w-2xl text-xs leading-relaxed text-slate-400 sm:text-sm">
-        Textbook photos, WhatsApp board screenshots, lecture slides and PDFs go in. Structured, page-by-page notes
-        come out.
-      </p>
-        </div>
-        <Lazy3D
+<>
+      <ToolHero
+        tag="Notes · Photos to PDF"
+        title="Turn Messy Sources Into Clean Notes"
+        text="Textbook photos, WhatsApp board screenshots, lecture slides and PDFs go in. Structured, page-by-page notes come out."
+        cta="Build my notes"
+        scene={<Lazy3D
           Scene={MessyCleanScene}
           props={{ beforeImage, status, progress, page: previewPage }}
-          className="h-72 w-full shrink-0 md:h-80 md:w-[40rem]"
-        />
-      </div>
-
-      <div className="mt-7 grid items-start gap-6 xl:grid-cols-[35fr_65fr]">
+          className="h-full w-full" />}
+        caption={null}
+        cards={[{ icon: ImagePlus, title: "Any source", text: "Photos, slides, PDFs" }, { icon: ListChecks, title: "3 formats", text: "Exam ready, summary, Q&A" }, { icon: FileDown, title: "Download", text: "Page-by-page PDF" }]}
+        stats={[{ value: "12", label: "Files per batch" }, { value: "15 MB", label: "Per file" }, { value: "3", label: "Note formats" }, { value: "PDF", label: "Ready to download" }]}
+      />
+      <ToolBody>
+    <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
+      <div className="grid items-start gap-6 xl:grid-cols-[35fr_65fr]">
         {/* LEFT 35%: upload and processing */}
         <section className={`min-w-0 overflow-hidden ${CARD_ACTIVE}`}>
           <WindowBar path="notes/sources.queue" title="Source upload and processing engine" right="Input" />
@@ -1014,5 +1013,7 @@ export default function NoteBuilder() {
         </section>
       </div>
     </div>
+      </ToolBody>
+    </>
   );
 }

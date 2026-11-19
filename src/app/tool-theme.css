@@ -1,0 +1,255 @@
+/*
+ * Light theme for the tool pages (Mastersheet, Grade Analyzer, Note Builder).
+ *
+ * The tool components were written for a dark UI. Inside .tool-light the colour
+ * scales they use are swapped: slate becomes a warm cream-to-espresso scale,
+ * emerald the purple accent, cyan pink, so every form, preview and panel turns
+ * light and warm without rewriting the components. Paper sheets keep real colours.
+ *
+ * Generated from tailwindcss/theme.css; regenerate if the palette changes.
+ */
+
+.tool-light {
+  --color-slate-50: #2a160c;
+  --color-slate-100: #3b2013;
+  --color-slate-200: #4f2c19;
+  --color-slate-300: #6b3f26;
+  --color-slate-400: #875536;
+  --color-slate-500: #9c6a45;
+  --color-slate-600: #c6976d;
+  --color-slate-700: #e2c09c;
+  --color-slate-800: #efd9c1;
+  --color-slate-900: #fbf0e2;
+  --color-slate-950: #fffaf3;
+  --color-emerald-50: oklch(29.3% 0.136 325.661);
+  --color-emerald-100: oklch(40.1% 0.17 325.612);
+  --color-emerald-200: oklch(45.2% 0.211 324.591);
+  --color-emerald-300: oklch(51.8% 0.253 323.949);
+  --color-emerald-400: oklch(59.1% 0.293 322.896);
+  --color-emerald-500: oklch(59.1% 0.293 322.896);
+  --color-emerald-600: oklch(66.7% 0.295 322.15);
+  --color-emerald-700: oklch(74% 0.238 322.16);
+  --color-emerald-800: oklch(90.3% 0.076 319.62);
+  --color-emerald-900: oklch(95.2% 0.037 318.852);
+  --color-emerald-950: oklch(97.7% 0.017 320.058);
+  --color-cyan-50: oklch(28.4% 0.109 3.907);
+  --color-cyan-100: oklch(40.8% 0.153 2.432);
+  --color-cyan-200: oklch(45.9% 0.187 3.815);
+  --color-cyan-300: oklch(52.5% 0.223 3.958);
+  --color-cyan-400: oklch(59.2% 0.249 0.584);
+  --color-cyan-500: oklch(59.2% 0.249 0.584);
+  --color-cyan-600: oklch(65.6% 0.241 354.308);
+  --color-cyan-700: oklch(71.8% 0.202 349.761);
+  --color-cyan-800: oklch(89.9% 0.061 343.231);
+  --color-cyan-900: oklch(94.8% 0.028 342.258);
+  --color-cyan-950: oklch(97.1% 0.014 343.198);
+  --color-sky-50: oklch(28.4% 0.109 3.907);
+  --color-sky-100: oklch(40.8% 0.153 2.432);
+  --color-sky-200: oklch(45.9% 0.187 3.815);
+  --color-sky-300: oklch(52.5% 0.223 3.958);
+  --color-sky-400: oklch(59.2% 0.249 0.584);
+  --color-sky-500: oklch(59.2% 0.249 0.584);
+  --color-sky-600: oklch(65.6% 0.241 354.308);
+  --color-sky-700: oklch(71.8% 0.202 349.761);
+  --color-sky-800: oklch(89.9% 0.061 343.231);
+  --color-sky-900: oklch(94.8% 0.028 342.258);
+  --color-sky-950: oklch(97.1% 0.014 343.198);
+  --color-amber-50: oklch(27.9% 0.077 45.635);
+  --color-amber-100: oklch(41.4% 0.112 45.904);
+  --color-amber-200: oklch(47.3% 0.137 46.201);
+  --color-amber-300: oklch(55.5% 0.163 48.998);
+  --color-amber-400: oklch(66.6% 0.179 58.318);
+  --color-amber-500: oklch(66.6% 0.179 58.318);
+  --color-amber-600: oklch(76.9% 0.188 70.08);
+  --color-amber-700: oklch(82.8% 0.189 84.429);
+  --color-amber-800: oklch(92.4% 0.12 95.746);
+  --color-amber-900: oklch(96.2% 0.059 95.617);
+  --color-amber-950: oklch(98.7% 0.022 95.277);
+  --color-red-50: oklch(25.8% 0.092 26.042);
+  --color-red-100: oklch(39.6% 0.141 25.723);
+  --color-red-200: oklch(44.4% 0.177 26.899);
+  --color-red-300: oklch(50.5% 0.213 27.518);
+  --color-red-400: oklch(57.7% 0.245 27.325);
+  --color-red-500: oklch(57.7% 0.245 27.325);
+  --color-red-600: oklch(63.7% 0.237 25.331);
+  --color-red-700: oklch(70.4% 0.191 22.216);
+  --color-red-800: oklch(88.5% 0.062 18.334);
+  --color-red-900: oklch(93.6% 0.032 17.717);
+  --color-red-950: oklch(97.1% 0.013 17.38);
+}
+
+/* Cream paper sheets keep their real ink and stone colours. */
+.tool-light [class*="bg-[#fbf9f1]"],
+.tool-light [class*="bg-[#f8f6ef]"] {
+  --color-slate-50: oklch(98.4% 0.003 247.858);
+  --color-slate-100: oklch(96.8% 0.007 247.896);
+  --color-slate-200: oklch(92.9% 0.013 255.508);
+  --color-slate-300: oklch(86.9% 0.022 252.894);
+  --color-slate-400: oklch(70.4% 0.04 256.788);
+  --color-slate-500: oklch(55.4% 0.046 257.417);
+  --color-slate-600: oklch(44.6% 0.043 257.281);
+  --color-slate-700: oklch(37.2% 0.044 257.287);
+  --color-slate-800: oklch(27.9% 0.041 260.031);
+  --color-slate-900: oklch(20.8% 0.042 265.755);
+  --color-slate-950: oklch(12.9% 0.042 264.695);
+  --color-emerald-50: oklch(97.9% 0.021 166.113);
+  --color-emerald-100: oklch(95% 0.052 163.051);
+  --color-emerald-200: oklch(90.5% 0.093 164.15);
+  --color-emerald-300: oklch(84.5% 0.143 164.978);
+  --color-emerald-400: oklch(76.5% 0.177 163.223);
+  --color-emerald-500: oklch(69.6% 0.17 162.48);
+  --color-emerald-600: oklch(59.6% 0.145 163.225);
+  --color-emerald-700: oklch(50.8% 0.118 165.612);
+  --color-emerald-800: oklch(43.2% 0.095 166.913);
+  --color-emerald-900: oklch(37.8% 0.077 168.94);
+  --color-emerald-950: oklch(26.2% 0.051 172.552);
+  --color-cyan-50: oklch(98.4% 0.019 200.873);
+  --color-cyan-100: oklch(95.6% 0.045 203.388);
+  --color-cyan-200: oklch(91.7% 0.08 205.041);
+  --color-cyan-300: oklch(86.5% 0.127 207.078);
+  --color-cyan-400: oklch(78.9% 0.154 211.53);
+  --color-cyan-500: oklch(71.5% 0.143 215.221);
+  --color-cyan-600: oklch(60.9% 0.126 221.723);
+  --color-cyan-700: oklch(52% 0.105 223.128);
+  --color-cyan-800: oklch(45% 0.085 224.283);
+  --color-cyan-900: oklch(39.8% 0.07 227.392);
+  --color-cyan-950: oklch(30.2% 0.056 229.695);
+  --color-sky-50: oklch(97.7% 0.013 236.62);
+  --color-sky-100: oklch(95.1% 0.026 236.824);
+  --color-sky-200: oklch(90.1% 0.058 230.902);
+  --color-sky-300: oklch(82.8% 0.111 230.318);
+  --color-sky-400: oklch(74.6% 0.16 232.661);
+  --color-sky-500: oklch(68.5% 0.169 237.323);
+  --color-sky-600: oklch(58.8% 0.158 241.966);
+  --color-sky-700: oklch(50% 0.134 242.749);
+  --color-sky-800: oklch(44.3% 0.11 240.79);
+  --color-sky-900: oklch(39.1% 0.09 240.876);
+  --color-sky-950: oklch(29.3% 0.066 243.157);
+  --color-amber-50: oklch(98.7% 0.022 95.277);
+  --color-amber-100: oklch(96.2% 0.059 95.617);
+  --color-amber-200: oklch(92.4% 0.12 95.746);
+  --color-amber-300: oklch(87.9% 0.169 91.605);
+  --color-amber-400: oklch(82.8% 0.189 84.429);
+  --color-amber-500: oklch(76.9% 0.188 70.08);
+  --color-amber-600: oklch(66.6% 0.179 58.318);
+  --color-amber-700: oklch(55.5% 0.163 48.998);
+  --color-amber-800: oklch(47.3% 0.137 46.201);
+  --color-amber-900: oklch(41.4% 0.112 45.904);
+  --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-red-50: oklch(97.1% 0.013 17.38);
+  --color-red-100: oklch(93.6% 0.032 17.717);
+  --color-red-200: oklch(88.5% 0.062 18.334);
+  --color-red-300: oklch(80.8% 0.114 19.571);
+  --color-red-400: oklch(70.4% 0.191 22.216);
+  --color-red-500: oklch(63.7% 0.237 25.331);
+  --color-red-600: oklch(57.7% 0.245 27.325);
+  --color-red-700: oklch(50.5% 0.213 27.518);
+  --color-red-800: oklch(44.4% 0.177 26.899);
+  --color-red-900: oklch(39.6% 0.141 25.723);
+  --color-red-950: oklch(25.8% 0.092 26.042);
+}
+
+/* Cards and windows: warm cream, extra-rounded, caramel ring. */
+.tool-light [class*="shadow-[0_0_0_1px_rgba(255,255,255,0.03)"] {
+  background-color: #fffaf2;
+  border-color: transparent;
+  border-radius: 1.75rem;
+  box-shadow: 0 1px 2px rgba(107, 58, 31, 0.08), 0 0 0 1px rgba(107, 58, 31, 0.12), 0 22px 44px -30px rgba(107, 58, 31, 0.55);
+}
+
+/* Window title bars: rich brown strip with cream text and a yellow tag. */
+.tool-light [class*="bg-slate-950/50"] {
+  background-image: linear-gradient(90deg, #5a2f17, #6b3a1f 45%, #8a4b26);
+  border-bottom-color: transparent;
+}
+.tool-light [class*="bg-slate-950/50"] p,
+.tool-light [class*="bg-slate-950/50"] p span,
+.tool-light [class*="bg-slate-950/50"] h2,
+.tool-light [class*="bg-slate-950/50"] h3 {
+  color: #fde7c8;
+}
+.tool-light [class*="bg-slate-950/50"] [class*="rounded-full"] {
+  background-color: #fcd34d;
+  border-color: #fcd34d;
+  color: #4f2c19;
+}
+
+/* Step headers (Grade Analyzer) get the same brown strip. */
+.tool-light section > header[class*="border-b"] {
+  background-image: linear-gradient(90deg, #5a2f17, #6b3a1f 45%, #8a4b26);
+  border-bottom-color: transparent;
+  border-radius: 1.75rem 1.75rem 0 0;
+}
+.tool-light section > header[class*="border-b"] h2 {
+  color: #fde7c8;
+}
+.tool-light section > header[class*="border-b"] > span {
+  border-color: rgba(253, 231, 200, 0.6);
+  color: #fde7c8;
+}
+
+/* The page behind the tools, so no dark body shows past the content. */
+body:has(.tool-light) {
+  background-color: #faf5fb;
+}
+
+/* Main action buttons and switches: bright green with deep purple text. */
+.tool-light .bg-emerald-500 {
+  background-color: #3ee07a;
+  color: #2a0730;
+}
+.tool-light .bg-emerald-500 svg {
+  color: #2a0730;
+}
+.tool-light .hover\:bg-emerald-400:hover {
+  background-color: #5cf091;
+}
+
+/* Form fields: white with a caramel edge. */
+.tool-light input:not([type="checkbox"]):not([type="radio"]),
+.tool-light select,
+.tool-light textarea {
+  background-color: #fff;
+  border-color: #e2c09c;
+}
+
+/* Upload drop zones: peach with a dashed orange edge. */
+.tool-light [class*="border-dashed"] {
+  background-color: #fff0e1;
+  border-color: #f0a868;
+}
+.tool-light [class*="border-dashed"] svg {
+  color: #ea7a2a;
+}
+
+/* Topic chips: yellow tags with brown text. */
+.tool-light [class*="rounded-md"][class*="bg-slate-900"][class*="font-mono"] {
+  background-color: #fde68a;
+  border-color: #f2c94c;
+  color: #4f2c19;
+}
+
+/* Inner panels (what we found, score, subject rows): soft caramel cards. */
+.tool-light [class*="bg-slate-900/90"] {
+  background-color: #fff6ea;
+}
+
+/* Note reader: warm desk with a dotted pattern while it waits for pages. */
+.tool-light [class*="overflow-y-auto"][class*="bg-slate-900/40"] {
+  background-color: #f6e6d2;
+  background-image: radial-gradient(rgba(107, 58, 31, 0.16) 1px, transparent 1.4px);
+  background-size: 18px 18px;
+}
+
+/* Window title bars: no traffic-light dots. */
+.tool-light [class*="bg-[#FF5F56]"],
+.tool-light [class*="bg-[#FFBD2E]"],
+.tool-light [class*="bg-[#27C93F]"] {
+  display: none;
+}
+.tool-light [class*="shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)]"] {
+  box-shadow: 0 30px 60px -30px rgba(107, 58, 31, 0.5);
+}
+.tool-light .backdrop-blur-xl {
+  backdrop-filter: none;
+}
