@@ -1,7 +1,75 @@
+"use client";
+
 import Link from "next/link";
+import dynamic from "next/dynamic";
+import Lazy3D from "@/components/three/Lazy3D";
+import type { TopicOrbitProps } from "@/components/three/TopicOrbitScene";
+import type { TargetProps } from "@/components/three/TargetScene";
+import type { WorkloadProps } from "@/components/three/WorkloadScene";
+import type { MessyCleanProps } from "@/components/three/MessyCleanScene";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Zap, Target, Map, BookOpen, Terminal, Sparkles, FileText, ArrowRight, CheckCircle2 } from "lucide-react";
+
+// Three.js only downloads in browsers that will show the scenes, and only for the open tab.
+const TopicOrbitScene = dynamic(() => import("@/components/three/TopicOrbitScene"), { ssr: false });
+const TargetScene = dynamic(() => import("@/components/three/TargetScene"), { ssr: false });
+const WorkloadScene = dynamic(() => import("@/components/three/WorkloadScene"), { ssr: false });
+const MessyCleanScene = dynamic(() => import("@/components/three/MessyCleanScene"), { ssr: false });
+
+/* Demo data for the showcase scenes (matches the CS301 sample on the Mastersheet tab). */
+const ORBIT: TopicOrbitProps = {
+  topics: [
+    { name: "Round Robin", importance: 9 },
+    { name: "Thrashing", importance: 9 },
+    { name: "Banker's Algorithm", importance: 8 },
+    { name: "Deadlock", importance: 8 },
+    { name: "Peterson's Solution", importance: 7 },
+    { name: "Paging", importance: 6 },
+  ],
+  files: 3,
+  generating: false,
+};
+
+const TARGET: TargetProps = {
+  target: 8.5,
+  subjects: [
+    { label: "OS", pct: 74.5 },
+    { label: "DBMS", pct: 82 },
+    { label: "CN", pct: 58 },
+    { label: "Maths", pct: 66 },
+    { label: "DSA", pct: 88 },
+  ],
+};
+
+const WORKLOAD: WorkloadProps = {
+  days: 7,
+  items: [
+    { name: "DBMS project", hours: 14 },
+    { name: "OS lab record", hours: 8 },
+    { name: "CN assignment", hours: 6 },
+  ],
+};
+
+const NOTES: MessyCleanProps = {
+  beforeImage: null,
+  status: "complete",
+  progress: 100,
+  page: {
+    title: "CPU Scheduling",
+    subtitle: "CS301 • Unit II",
+    blocks: [
+      { type: "heading", text: "Key formulas" },
+      { type: "formula", label: "TAT", text: "TAT = CT - AT" },
+      { type: "formula", label: "WT", text: "WT = TAT - BT" },
+      { type: "heading", text: "Round Robin" },
+      { type: "bullet", text: "Each process gets a fixed time quantum." },
+      { type: "bullet", text: "Small quantum means more context switches." },
+    ],
+  },
+};
+
+const SCENE_BOX = "mb-6 h-56 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/80 sm:h-64";
 
 export default function SemosShowcase() {
   return (
@@ -72,6 +140,7 @@ export default function SemosShowcase() {
                 </CardHeader>
 
                 <CardContent className="pt-6">
+                  <Lazy3D Scene={TopicOrbitScene} props={ORBIT} className={SCENE_BOX} />
                   <div className="academic-paper relative rounded-xl p-6 font-serif sm:p-8">
                     <div className="mb-4 flex items-center justify-between gap-3 border-b border-stone-300 pb-3">
                       <div>
@@ -127,6 +196,7 @@ export default function SemosShowcase() {
                 </CardHeader>
 
                 <CardContent className="pt-6">
+                  <Lazy3D Scene={TargetScene} props={TARGET} className={SCENE_BOX} />
                   <div className="relative flex min-h-[220px] items-center overflow-hidden rounded-xl border border-slate-800 bg-slate-950 p-6">
                     <div
                       aria-hidden="true"
@@ -159,6 +229,7 @@ export default function SemosShowcase() {
                   <CardDescription className="text-xs text-slate-400">Milestone tracking for course deliverables.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <Lazy3D Scene={WorkloadScene} props={WORKLOAD} className={SCENE_BOX} />
                   <div className="space-y-3 font-mono text-xs">
                     <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-950 p-3">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
@@ -181,6 +252,7 @@ export default function SemosShowcase() {
                   <CardDescription className="text-xs text-slate-400">Structured formula parser &amp; exam note generator.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <Lazy3D Scene={MessyCleanScene} props={NOTES} className={SCENE_BOX} />
                   <div className="overflow-x-auto rounded-lg border border-slate-800 bg-slate-950 p-4 font-mono text-xs text-slate-300">
                     <code>const note = await semos.generateSummary(syllabusPDF);</code>
                   </div>
