@@ -86,3 +86,12 @@ body {
   .animate-showcaseIn { animation: none; }
 }
 
+
+/* Diagonal hatching for empty chart tracks (Roadmap dashboard). */
+.bg-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgb(15 23 42 / 0.07) 0 1.5px,
+    transparent 1.5px 7px
+  );
+}

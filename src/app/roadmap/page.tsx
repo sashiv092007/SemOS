@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
+import { Urbanist } from "next/font/google";
 import RoadmapPlanner from "@/components/RoadmapPlanner";
-import { Navbar } from "@/components/SemOSLandingPage";
-import AmbientGrid3D from "@/components/AmbientGrid3D";
-import ToolTabs from "@/components/ToolTabs";
-import { Backdrop } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Roadmap · SemOS" };
 
+// Rounded geometric sans used across the Roadmap dashboard.
+const urbanist = Urbanist({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+
 export default function RoadmapPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-200">
-      <Navbar />
-      <main className="relative isolate">
-        <Backdrop />
-        <AmbientGrid3D />
-        <ToolTabs />
-        <RoadmapPlanner />
-      </main>
+    <div className={`${urbanist.className} min-h-screen bg-[#f4f5f7] text-slate-700`}>
+      <RoadmapPlanner />
     </div>
   );
 }

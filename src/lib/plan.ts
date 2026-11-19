@@ -10,7 +10,10 @@ export type Assignment = {
   hours: number;
   done: boolean;
   doneAt?: number; // ms epoch, when it was ticked off
+  logs?: TimeLog[]; // study time the student logged against this assignment
 };
+
+export type TimeLog = { at: number; hours: number };
 
 export type Plan = {
   startAt: number; // ms epoch, when the timer started
@@ -51,6 +54,22 @@ export function buildSchedule(plan: Plan): Slot[] {
     return { ...a, order: i + 1, start, end, share };
   });
 }
+
+/* ---------- Time devoted ---------- */
+
+/**
+ * Every stretch of study time on an assignment: the hours the student logged,
+ * plus, once it is ticked off, any planned hours they did not log (credited to
+ * the day it was finished).
+ */
+export function timeEntries(a: Assignment): TimeLog[] {
+  const logs = a.logs ?? [];
+  const logged = logs.reduce((s, l) => s + l.hours, 0);
+  if (a.done && a.doneAt && logged < a.hours) return [...logs, { at: a.doneAt, hours: a.hours - logged }];
+  return logs;
+}
+
+export const devotedHours = (a: Assignment) => timeEntries(a).reduce((s, l) => s + l.hours, 0);
 
 /* ---------- Formatting ---------- */
 
