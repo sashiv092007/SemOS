@@ -1,0 +1,305 @@
+/*
+ * Dark theme for the whole site, switched on by <html data-theme="dark"> (see lib/theme.ts).
+ *
+ * The pages were designed light, so instead of a second set of classes this file swaps
+ * colours underneath them:
+ * 1. Light-designed areas (home, Roadmap, top bars, tool headers, account): the slate scale
+ *    is turned upside down (dark text becomes light, light panels become dark) and the few
+ *    hard-coded whites, creams and plums get dark equivalents.
+ * 2. Tool bodies (.tool-light, see tool-theme.css): slate becomes a dark plum scale the
+ *    right way up, and the green / purple / pink accents keep their brightness.
+ * 3. Printed-paper sheets stay cream, like real paper on a dark desk.
+ */
+
+/* ------------------------------------------------------------------ */
+/*  1. Light-designed areas                                            */
+/* ------------------------------------------------------------------ */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* Upside-down plum-tinted slate: 900 is now the lightest text, 50 the darkest panel. */
+  --color-slate-50: #1d1222;
+  --color-slate-100: #241629;
+  --color-slate-200: #331f3b;
+  --color-slate-300: #47324f;
+  --color-slate-400: #6f5a77;
+  --color-slate-500: #a28aa9;
+  --color-slate-600: #bba5c1;
+  --color-slate-700: #d3c0d8;
+  --color-slate-800: #e6d8ea;
+  --color-slate-900: #f5eaf7;
+  --color-slate-950: #fbf5fc;
+}
+
+:root[data-theme="dark"] body {
+  background-color: #140b17;
+}
+
+/* Page canvases */
+:root[data-theme="dark"] .bg-\[\#faf5fb\],
+:root[data-theme="dark"] body:has(.tool-light) {
+  background-color: #140b17;
+}
+
+/* White cards and glass */
+:root[data-theme="dark"] .bg-white,
+:root[data-theme="dark"] .focus\:bg-white:focus {
+  background-color: #20132a;
+}
+:root[data-theme="dark"] .hover\:bg-white:hover {
+  background-color: #2b1a35;
+}
+:root[data-theme="dark"] .bg-white\/80 { background-color: rgb(32 19 42 / 0.82); }
+:root[data-theme="dark"] .bg-white\/70 { background-color: rgb(32 19 42 / 0.74); }
+:root[data-theme="dark"] .bg-white\/65 { background-color: rgb(32 19 42 / 0.7); }
+:root[data-theme="dark"] .bg-white\/60 { background-color: rgb(32 19 42 / 0.66); }
+:root[data-theme="dark"] .bg-white\/50 { background-color: rgb(32 19 42 / 0.6); }
+:root[data-theme="dark"] .from-white\/85,
+:root[data-theme="dark"] .from-white\/80 {
+  --tw-gradient-from: rgb(38 23 48 / 0.85);
+}
+:root[data-theme="dark"] .bg-\[\#fffaf2\] { background-color: #22152a; }
+:root[data-theme="dark"] .bg-\[\#fff0e1\] { background-color: #2a1a24; }
+
+/* Edges */
+:root[data-theme="dark"] .ring-white,
+:root[data-theme="dark"] .ring-white\/90,
+:root[data-theme="dark"] .ring-white\/80,
+:root[data-theme="dark"] .ring-white\/70,
+:root[data-theme="dark"] .ring-white\/50 {
+  --tw-ring-color: rgb(240 200 255 / 0.1);
+}
+:root[data-theme="dark"] .border-white\/60 { border-color: rgb(240 200 255 / 0.1); }
+:root[data-theme="dark"] .ring-\[\#5b1065\]\/10,
+:root[data-theme="dark"] .ring-\[\#5b1065\]\/15,
+:root[data-theme="dark"] .ring-\[\#6b3a1f\]\/10,
+:root[data-theme="dark"] .ring-\[\#6b3a1f\]\/15 {
+  --tw-ring-color: rgb(240 200 255 / 0.12);
+}
+:root[data-theme="dark"] .border-\[\#5b1065\]\/15,
+:root[data-theme="dark"] .border-\[\#f1e2d0\],
+:root[data-theme="dark"] .border-\[\#e2c09c\] {
+  border-color: rgb(240 200 255 / 0.14);
+}
+:root[data-theme="dark"] .divide-\[\#f1e2d0\] > :not(:last-child),
+:root[data-theme="dark"] .divide-fuchsia-100 > :not(:last-child) {
+  border-color: rgb(240 200 255 / 0.1);
+}
+
+/* Plum and brown text on light paper becomes light */
+:root[data-theme="dark"] .text-\[\#3b0a45\],
+:root[data-theme="dark"] .hover\:text-\[\#3b0a45\]:hover {
+  color: #f5eaf7;
+}
+:root[data-theme="dark"] .text-\[\#5b1065\],
+:root[data-theme="dark"] .hover\:text-\[\#5b1065\]:hover {
+  color: #eab0f5;
+}
+:root[data-theme="dark"] .text-\[\#5b1065\]\/70 { color: rgb(234 176 245 / 0.75); }
+:root[data-theme="dark"] .text-\[\#6b3a1f\] { color: #f2d3b3; }
+:root[data-theme="dark"] .text-\[\#9c6a45\] { color: #dcb08a; }
+:root[data-theme="dark"] .text-\[\#b58a68\],
+:root[data-theme="dark"] .placeholder\:text-\[\#b58a68\]::placeholder {
+  color: #b39079;
+}
+
+/* Soft tinted panels become low-key tints of the same hue */
+:root[data-theme="dark"] .hover\:bg-fuchsia-50:hover,
+:root[data-theme="dark"] .bg-fuchsia-50,
+:root[data-theme="dark"] .bg-fuchsia-100 { background-color: rgb(217 70 239 / 0.14); }
+:root[data-theme="dark"] .bg-red-50 { background-color: rgb(239 68 68 / 0.14); }
+:root[data-theme="dark"] .bg-green-50,
+:root[data-theme="dark"] .bg-green-100 { background-color: rgb(34 197 94 / 0.14); }
+:root[data-theme="dark"] .bg-emerald-50 { background-color: rgb(16 185 129 / 0.14); }
+:root[data-theme="dark"] .bg-orange-50 { background-color: rgb(249 115 22 / 0.14); }
+:root[data-theme="dark"] .bg-blue-50 { background-color: rgb(59 130 246 / 0.14); }
+:root[data-theme="dark"] .bg-yellow-100 { background-color: rgb(250 204 21 / 0.16); }
+:root[data-theme="dark"] .bg-pink-100 { background-color: rgb(236 72 153 / 0.16); }
+:root[data-theme="dark"] .ring-red-200 { --tw-ring-color: rgb(239 68 68 / 0.35); }
+:root[data-theme="dark"] .ring-emerald-200 { --tw-ring-color: rgb(16 185 129 / 0.35); }
+:root[data-theme="dark"] .ring-yellow-300 { --tw-ring-color: rgb(250 204 21 / 0.45); }
+
+/* Dark text that sat on those soft tints gets the light shade of its hue */
+:root[data-theme="dark"] :is(.bg-red-50, .bg-red-50 *).text-red-700 { color: #fca5a5; }
+:root[data-theme="dark"] :is(.bg-emerald-50, .bg-emerald-50 *).text-emerald-800 { color: #6ee7b7; }
+:root[data-theme="dark"] :is(.bg-yellow-100, .bg-yellow-100 *).text-yellow-900 { color: #fde68a; }
+:root[data-theme="dark"] :is(.bg-green-50, .bg-green-50 *):is(.text-green-700, .text-green-800) { color: #86efac; }
+:root[data-theme="dark"] :is(.bg-orange-50, .bg-orange-50 *):is(.text-orange-700, .text-orange-800) { color: #fdba74; }
+:root[data-theme="dark"] :is(.bg-blue-50, .bg-blue-50 *).text-blue-700 { color: #93c5fd; }
+
+/* Pastel stat tiles (tool "At a glance"): light ink on the dark tint */
+:root[data-theme="dark"] .bg-green-100.text-green-800 { color: #86efac; }
+:root[data-theme="dark"] .bg-yellow-100.text-yellow-800 { color: #fde68a; }
+:root[data-theme="dark"] .bg-pink-100.text-pink-800 { color: #f9a8d4; }
+
+/* Roadmap: chart centres and the "now working on" card */
+:root[data-theme="dark"] svg circle[fill="white"],
+:root[data-theme="dark"] .fill-white {
+  fill: #20132a;
+}
+:root[data-theme="dark"] .from-fuchsia-200 { --tw-gradient-from: rgb(217 70 239 / 0.38); }
+:root[data-theme="dark"] .via-pink-100 { --tw-gradient-via: rgb(236 72 153 / 0.2); }
+:root[data-theme="dark"] .to-amber-100 { --tw-gradient-to: rgb(245 158 11 / 0.2); }
+
+/* Near-black buttons (home "Make your mastersheet", etc.) turn plum so they stand out */
+:root[data-theme="dark"] .bg-slate-900:not(.tool-light *),
+:root[data-theme="dark"] .group:hover .group-hover\:bg-slate-900:not(.tool-light *) {
+  background-color: #8a2b98;
+}
+:root[data-theme="dark"] .from-slate-800:not(.tool-light *) {
+  --tw-gradient-from: #9a34a8;
+}
+:root[data-theme="dark"] .to-slate-950:not(.tool-light *) {
+  --tw-gradient-to: #4c1157;
+}
+:root[data-theme="dark"] .hover\:bg-slate-700:hover:not(.tool-light *) {
+  background-color: #a23cb2;
+}
+:root[data-theme="dark"] .bg-slate-900.text-white :is(svg, span):not([class*="bg-"]) {
+  color: #fff;
+}
+
+/* Home weather sky: night over the same weather */
+.semos-night {
+  display: none;
+}
+:root[data-theme="dark"] .semos-night {
+  display: block;
+  background: linear-gradient(180deg, rgb(12 6 22 / 0.78), rgb(20 11 23 / 0.62) 45%, rgb(20 11 23 / 0.7));
+}
+
+/* ------------------------------------------------------------------ */
+/*  2. Tool bodies                                                     */
+/* ------------------------------------------------------------------ */
+
+:root[data-theme="dark"] .tool-light {
+  /* Dark plum slate, the right way up (the components were first written dark). */
+  --color-slate-50: #fbf5fc;
+  --color-slate-100: #f5eaf7;
+  --color-slate-200: #e6d8ea;
+  --color-slate-300: #d3c0d8;
+  --color-slate-400: #b29bb8;
+  --color-slate-500: #8f7896;
+  --color-slate-600: #6a5572;
+  --color-slate-700: #46324f;
+  --color-slate-800: #33213b;
+  --color-slate-900: #23152b;
+  --color-slate-950: #170d1c;
+  /* Green accents read as fuchsia, cyan / sky as pink, as in the light theme. */
+  --color-emerald-50: oklch(97.7% 0.017 320.058);
+  --color-emerald-100: oklch(95.2% 0.037 318.852);
+  --color-emerald-200: oklch(90.3% 0.076 319.62);
+  --color-emerald-300: oklch(83.3% 0.145 321.434);
+  --color-emerald-400: oklch(74% 0.238 322.16);
+  --color-emerald-500: oklch(66.7% 0.295 322.15);
+  --color-emerald-600: oklch(59.1% 0.293 322.896);
+  --color-emerald-700: oklch(51.8% 0.253 323.949);
+  --color-emerald-800: oklch(45.2% 0.211 324.591);
+  --color-emerald-900: oklch(40.1% 0.17 325.612);
+  --color-emerald-950: oklch(29.3% 0.136 325.661);
+  --color-cyan-50: oklch(97.1% 0.014 343.198);
+  --color-cyan-100: oklch(94.8% 0.028 342.258);
+  --color-cyan-200: oklch(89.9% 0.061 343.231);
+  --color-cyan-300: oklch(82.3% 0.12 346.018);
+  --color-cyan-400: oklch(71.8% 0.202 349.761);
+  --color-cyan-500: oklch(65.6% 0.241 354.308);
+  --color-cyan-600: oklch(59.2% 0.249 0.584);
+  --color-cyan-700: oklch(52.5% 0.223 3.958);
+  --color-cyan-800: oklch(45.9% 0.187 3.815);
+  --color-cyan-900: oklch(40.8% 0.153 2.432);
+  --color-cyan-950: oklch(28.4% 0.109 3.907);
+  --color-sky-50: oklch(97.1% 0.014 343.198);
+  --color-sky-100: oklch(94.8% 0.028 342.258);
+  --color-sky-200: oklch(89.9% 0.061 343.231);
+  --color-sky-300: oklch(82.3% 0.12 346.018);
+  --color-sky-400: oklch(71.8% 0.202 349.761);
+  --color-sky-500: oklch(65.6% 0.241 354.308);
+  --color-sky-600: oklch(59.2% 0.249 0.584);
+  --color-sky-700: oklch(52.5% 0.223 3.958);
+  --color-sky-800: oklch(45.9% 0.187 3.815);
+  --color-sky-900: oklch(40.8% 0.153 2.432);
+  --color-sky-950: oklch(28.4% 0.109 3.907);
+  --color-amber-50: oklch(98.7% 0.022 95.277);
+  --color-amber-100: oklch(96.2% 0.059 95.617);
+  --color-amber-200: oklch(92.4% 0.12 95.746);
+  --color-amber-300: oklch(87.9% 0.169 91.605);
+  --color-amber-400: oklch(82.8% 0.189 84.429);
+  --color-amber-500: oklch(76.9% 0.188 70.08);
+  --color-amber-600: oklch(66.6% 0.179 58.318);
+  --color-amber-700: oklch(55.5% 0.163 48.998);
+  --color-amber-800: oklch(47.3% 0.137 46.201);
+  --color-amber-900: oklch(41.4% 0.112 45.904);
+  --color-amber-950: oklch(27.9% 0.077 45.635);
+  --color-red-50: oklch(97.1% 0.013 17.38);
+  --color-red-100: oklch(93.6% 0.032 17.717);
+  --color-red-200: oklch(88.5% 0.062 18.334);
+  --color-red-300: oklch(80.8% 0.114 19.571);
+  --color-red-400: oklch(70.4% 0.191 22.216);
+  --color-red-500: oklch(63.7% 0.237 25.331);
+  --color-red-600: oklch(57.7% 0.245 27.325);
+  --color-red-700: oklch(50.5% 0.213 27.518);
+  --color-red-800: oklch(44.4% 0.177 26.899);
+  --color-red-900: oklch(39.6% 0.141 25.723);
+  --color-red-950: oklch(25.8% 0.092 26.042);
+}
+
+/* Cards and windows */
+:root[data-theme="dark"] .tool-light [class*="shadow-[0_0_0_1px_rgba(255,255,255,0.03)"] {
+  background-color: #1f1327;
+  box-shadow: 0 0 0 1px rgb(240 200 255 / 0.1), 0 22px 44px -30px rgb(0 0 0 / 0.8);
+}
+/* Title bars: deeper brown */
+:root[data-theme="dark"] .tool-light [class*="bg-slate-950/50"],
+:root[data-theme="dark"] .tool-light section > header[class*="border-b"] {
+  background-image: linear-gradient(90deg, #3d1f0f, #4e2915 45%, #643619);
+}
+/* Yellow tag on the title bars keeps its fill (the inner-panel rule below would darken it) */
+:root[data-theme="dark"] .tool-light [class*="bg-slate-950/50"] [class*="rounded-full"] {
+  background-color: #fcd34d;
+  border-color: #fcd34d;
+  color: #4f2c19;
+}
+/* Form fields */
+:root[data-theme="dark"] .tool-light input:not([type="checkbox"]):not([type="radio"]),
+:root[data-theme="dark"] .tool-light select,
+:root[data-theme="dark"] .tool-light textarea {
+  background-color: #2a1a33;
+  border-color: rgb(240 200 255 / 0.16);
+}
+/* Upload drop zones */
+:root[data-theme="dark"] .tool-light [class*="border-dashed"] {
+  background-color: rgb(240 168 104 / 0.08);
+  border-color: rgb(240 168 104 / 0.45);
+}
+/* Inner panels */
+:root[data-theme="dark"] .tool-light [class*="bg-slate-900/90"] {
+  background-color: #271830;
+}
+/* Note reader desk */
+:root[data-theme="dark"] .tool-light [class*="overflow-y-auto"][class*="bg-slate-900/40"] {
+  background-color: #1a0f1f;
+  background-image: radial-gradient(rgb(242 211 179 / 0.1) 1px, transparent 1.4px);
+}
+:root[data-theme="dark"] .tool-light [class*="shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)]"] {
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.85);
+}
+
+/* ------------------------------------------------------------------ */
+/*  3. Paper sheets keep real ink on cream                             */
+/* ------------------------------------------------------------------ */
+
+:root[data-theme="dark"] [class*="bg-[#fbf9f1]"],
+:root[data-theme="dark"] [class*="bg-[#f8f6ef]"],
+:root[data-theme="dark"] .bg-paper {
+  --color-slate-50: oklch(98.4% 0.003 247.858);
+  --color-slate-100: oklch(96.8% 0.007 247.896);
+  --color-slate-200: oklch(92.9% 0.013 255.508);
+  --color-slate-300: oklch(86.9% 0.022 252.894);
+  --color-slate-400: oklch(70.4% 0.04 256.788);
+  --color-slate-500: oklch(55.4% 0.046 257.417);
+  --color-slate-600: oklch(44.6% 0.043 257.281);
+  --color-slate-700: oklch(37.2% 0.044 257.287);
+  --color-slate-800: oklch(27.9% 0.041 260.031);
+  --color-slate-900: oklch(20.8% 0.042 265.755);
+  --color-slate-950: oklch(12.9% 0.042 264.695);
+}

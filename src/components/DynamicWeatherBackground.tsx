@@ -382,6 +382,8 @@ export default function DynamicWeatherBackground({ status }: { status: Assignmen
       />
       {/* Soft vignette keeps text readable over the scene. */}
       <div className="absolute inset-0" style={{ background: "radial-gradient(130% 90% at 50% 30%, transparent 55%, rgba(15,23,42,0.18))" }} />
+      {/* Dark theme: the same weather at night (styled in dark-theme.css). */}
+      <div className="semos-night absolute inset-0" />
       <div ref={flashRef} className="absolute inset-0 bg-white opacity-0" />
     </div>
   );

@@ -24,6 +24,8 @@ import { weatherFromPlan, type AssignmentStatus } from "@/lib/weather";
 import DynamicWeatherBackground from "./DynamicWeatherBackground";
 import Hourglass3D from "./Hourglass3D";
 import AccountButton from "./AccountButton";
+import ThemeToggle from "./ThemeToggle";
+import SemosLogo from "./SemosLogo";
 import { DocumentSheet, SandTimer } from "./SemOSLandingPage";
 
 /* ------------------------------------------------------------------ */
@@ -180,12 +182,7 @@ function statsFor(plan: Plan | null | undefined, now: number): Stats {
 function Nav({ theme }: { theme: Theme }) {
   return (
     <header className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 pt-5 sm:px-6">
-      <Link href="/" className={`flex items-center gap-2.5 rounded-full text-xl font-bold tracking-tight ${theme.ink} ${FOCUS}`}>
-        <span aria-hidden="true" className="grid h-9 w-9 place-items-center rounded-full bg-slate-900 shadow-sm">
-          <span className="h-3 w-3 rounded-[3px] bg-emerald-400" />
-        </span>
-        SemOS
-      </Link>
+      <SemosLogo textClass={theme.ink} />
       <nav aria-label="Primary" className="hidden items-center gap-7 md:flex">
         {TOOLS.map((t) => (
           <Link key={t.href} href={t.href} className={`rounded-sm text-sm font-semibold transition-opacity duration-150 hover:opacity-70 ${theme.ink} ${FOCUS}`}>
@@ -194,6 +191,7 @@ function Nav({ theme }: { theme: Theme }) {
         ))}
       </nav>
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <AccountButton tone="glass" />
         <Link href="/roadmap" className={BTN_DARK}>
           Start planning

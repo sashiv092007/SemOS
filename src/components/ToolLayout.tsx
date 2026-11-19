@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { deadlineOf, useNow, usePlan } from "@/lib/plan";
 import AccountButton from "./AccountButton";
+import SemosLogo from "./SemosLogo";
 
 /*
  * Dashboard chrome shared by Mastersheet, Grade Analyzer and Note Builder.
@@ -55,12 +56,7 @@ export function ToolNav() {
 
   return (
     <header className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-4 px-4 pt-5 sm:px-6">
-      <Link href="/" className={`flex items-center gap-2.5 rounded-xl text-lg font-bold tracking-tight text-[#3b0a45] ${FOCUS}`}>
-        <span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-xl bg-[#5b1065] shadow-sm">
-          <span className="h-3.5 w-3.5 rotate-12 rounded-[4px] bg-yellow-300" />
-        </span>
-        SemOS
-      </Link>
+      <SemosLogo />
 
       <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 lg:order-none lg:mx-0 lg:w-auto lg:px-0">
         <ul className="flex gap-2">
