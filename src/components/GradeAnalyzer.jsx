@@ -512,8 +512,9 @@ export default function GradeAnalyzer() {
   const [fileError, setFileError] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const scanTimer = useRef(null);
-  useEffect(() => () => clearTimeout(scanTimer.current), []);
+  const [readout, setReadout] = useState(null); // what the AI read from the plan
+  const scanRequest = useRef(null);
+  useEffect(() => () => scanRequest.current?.abort(), []);
 
   /* ----- step 1 ----- */
   const proceed = (e) => {
@@ -547,25 +548,62 @@ export default function GradeAnalyzer() {
     );
 
   /* ----- step 3 ----- */
+  /** Send the plan to the AI and fill the upcoming assessments from what it finds. */
+  const readPlan = async (list) => {
+    scanRequest.current?.abort();
+    if (list.length === 0) {
+      setScanning(false);
+      return;
+    }
+    const controller = new AbortController();
+    scanRequest.current = controller;
+    setScanning(true);
+    setReadout(null);
+    const body = new FormData();
+    for (const f of list) body.append("files", f.file, f.name);
+    try {
+      const res = await fetch("/api/evaluation", { method: "POST", body, signal: controller.signal });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json) throw new Error(json?.error || "The plan could not be read. Set the assessments below by hand.");
+      const upcoming = json.components.filter((c) => c.status !== "done");
+      const done = json.components.filter((c) => c.status === "done");
+      if (upcoming.length) {
+        setAssessments(upcoming.map((c) => ({ id: newId(), name: c.name, weight: c.weight, max: c.max })));
+      }
+      setReadout({ course: json.course, upcoming, done, note: json.note, unknown: upcoming.filter((c) => c.status === "unknown") });
+      setFileError("");
+    } catch (err) {
+      if (err.name === "AbortError") return;
+      setFileError(err.message.replace(/\.$/, ""));
+    } finally {
+      if (scanRequest.current === controller) setScanning(false);
+    }
+  };
+
   const addFiles = (list) => {
-    const ok = [".pdf", ".docx", ".png", ".jpg", ".jpeg", ".webp"];
+    const ok = [".pdf", ".png", ".jpg", ".jpeg", ".webp"];
     const next = [...files];
     const bad = [];
     for (const f of Array.from(list)) {
       const ext = f.name.includes(".") ? f.name.slice(f.name.lastIndexOf(".")).toLowerCase() : "";
-      if (!ok.includes(ext)) bad.push(`${f.name}: file type not accepted`);
+      if (ext === ".docx" || ext === ".doc") bad.push(`${f.name}: save Word files as PDF first`);
+      else if (!ok.includes(ext)) bad.push(`${f.name}: file type not accepted`);
       else if (f.size > 10 * 1024 * 1024) bad.push(`${f.name}: larger than 10 MB`);
       else if (next.length >= 3) bad.push(`${f.name}: limit of 3 files reached`);
-      else if (!next.some((x) => x.name === f.name && x.size === f.size)) next.push({ name: f.name, size: f.size });
+      else if (!next.some((x) => x.name === f.name && x.size === f.size)) next.push({ name: f.name, size: f.size, file: f });
     }
     setFileError(bad.join(". "));
-    if (next.length > files.length) {
-      // sweep the laser over the document for a moment
-      setScanning(true);
-      clearTimeout(scanTimer.current);
-      scanTimer.current = setTimeout(() => setScanning(false), 3600);
-    }
     setFiles(next);
+    if (next.length > files.length) readPlan(next);
+  };
+  const removePlanFile = (f) => {
+    const next = files.filter((x) => x !== f);
+    setFiles(next);
+    if (next.length === 0) {
+      scanRequest.current?.abort();
+      setScanning(false);
+      setReadout(null);
+    }
   };
   const weightSum = assessments.reduce((s, a) => s + a.weight, 0);
   const patchAssessment = (id, change) =>
@@ -742,7 +780,7 @@ export default function GradeAnalyzer() {
                   id="cdp-upload"
                   type="file"
                   multiple
-                  accept=".pdf,.docx,.png,.jpg,.jpeg,.webp"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp"
                   className="sr-only"
                   onChange={(e) => {
                     addFiles(e.target.files);
@@ -753,11 +791,11 @@ export default function GradeAnalyzer() {
                   <Upload className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" aria-hidden="true" />
                   <span>
                     <span className="block text-sm font-medium text-slate-100">
-                      Upload CDP / Syllabus Evaluation Breakdown (.pdf, .docx, screenshot)
+                      Upload CDP / Syllabus Evaluation Breakdown (.pdf or screenshot)
                     </span>
                     <span className="mt-1 block text-xs leading-relaxed text-slate-500">
-                      Upload your continuous evaluation split (e.g., Mid-Sem 30%, Lab 20%, End-Sem 50%) so SemOS can
-                      map out your exact path to hit your target.
+                      SemOS reads the evaluation split (e.g., Mid-Sem 30%, Lab 20%, End-Sem 50%) and fills in the
+                      assessments still to come. Save Word files as PDF first.
                     </span>
                   </span>
                 </span>
@@ -770,7 +808,7 @@ export default function GradeAnalyzer() {
                       <span className="min-w-0 flex-1 truncate font-mono text-xs text-slate-200">{f.name}</span>
                       <button
                         type="button"
-                        onClick={() => setFiles(files.filter((x) => x !== f))}
+                        onClick={() => removePlanFile(f)}
                         aria-label={`Remove ${f.name}`}
                         className="inline-flex h-5 w-5 rounded items-center justify-center text-slate-500 transition-colors hover:text-slate-100"
                       >
@@ -784,13 +822,28 @@ export default function GradeAnalyzer() {
               </div>
               {scanning ? (
                 <p className={`mt-2 ${BADGE}`} role="status">
-                  Scanning document…
+                  Reading the evaluation scheme…
                 </p>
               ) : null}
-              {files.length && !scanning ? (
-                <p className="mt-2 text-xs text-amber-300">
-                  Attached. Automatic reading of the file is not connected yet, so set the split below.
-                </p>
+              {readout && !scanning ? (
+                <div role="status" className="mt-2 rounded-lg border border-emerald-400/30 bg-emerald-400/5 px-3 py-2.5 text-xs leading-relaxed text-slate-300">
+                  <p className="font-medium text-slate-100">
+                    Read {readout.course ? `${readout.course}: ` : ""}
+                    {readout.upcoming.length} upcoming {readout.upcoming.length === 1 ? "assessment" : "assessments"} filled in below.
+                  </p>
+                  {readout.done.length ? (
+                    <p className="mt-1">
+                      Already assessed, so counted in your marks so far:{" "}
+                      {readout.done.map((c) => `${c.name} (${c.weight}%)`).join(", ")}.
+                    </p>
+                  ) : null}
+                  {readout.unknown.length ? (
+                    <p className="mt-1 text-amber-300">
+                      No date found for {readout.unknown.map((c) => c.name).join(", ")}, so treated as still to come. Remove it if it is done.
+                    </p>
+                  ) : null}
+                  {readout.note ? <p className="mt-1 text-amber-300">{readout.note}</p> : null}
+                </div>
               ) : null}
               {fileError ? (
                 <p role="alert" className="mt-2 text-xs text-red-300">
