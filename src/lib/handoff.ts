@@ -6,7 +6,7 @@
  * something shared in a Class Room. Kept in sessionStorage so a reload does not repeat it.
  */
 
-export type HandoffKind = "pyq" | "mastersheet" | "notes" | "viva";
+export type HandoffKind = "pyq" | "mastersheet" | "notes";
 
 const key = (kind: HandoffKind) => `semos.handoff.${kind}`;
 
@@ -34,5 +34,4 @@ export const TOOL_PATH: Record<HandoffKind, string> = {
   pyq: "/pyq",
   mastersheet: "/mastersheet",
   notes: "/note-builder",
-  viva: "/viva",
 };

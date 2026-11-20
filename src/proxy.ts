@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 /**
  * Links pasted into chats often pick up the punctuation after them
- * ("…/viva." or "(…/rooms?join=K7QM2P)"), which would show a 404.
+ * ("…/pyq." or "(…/rooms?join=K7QM2P)"), which would show a 404.
  * Strip trailing punctuation from the path and send the visitor to the real page.
  */
 const TRAILING = /[.,;:!?)\]'"]+$/;

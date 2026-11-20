@@ -73,9 +73,6 @@ const KIND: Record<ItemKind, { label: string; icon: typeof Sun; tile: string }> 
 
 const MATERIAL: ItemKind[] = ["pyq", "notes", "mastersheet"];
 
-/** Saved work that can be shared into a room. */
-type Shareable = LibraryItem & { kind: "pyq" | "notes" | "mastersheet" };
-
 function ago(iso: string) {
   const s = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
   if (s < 60) return "just now";
@@ -286,13 +283,13 @@ function Composer({ roomId, author, onPosted }: { roomId: string; author: string
   const [due, setDue] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [library, setLibrary] = useState<Shareable[] | null>(null);
+  const [library, setLibrary] = useState<LibraryItem[] | null>(null);
   const [shared, setShared] = useState<string[]>([]);
 
   useEffect(() => {
     if (tab !== "library" || library) return;
     Promise.all([listLibrary("pyq"), listLibrary("notes"), listLibrary("mastersheet")])
-      .then((lists) => setLibrary((lists.flat() as Shareable[]).sort((a, b) => b.created_at.localeCompare(a.created_at))))
+      .then((lists) => setLibrary(lists.flat().sort((a, b) => b.created_at.localeCompare(a.created_at))))
       .catch((e: Error) => setError(e.message));
   }, [tab, library]);
 
@@ -330,7 +327,7 @@ function Composer({ roomId, author, onPosted }: { roomId: string; author: string
     setBusy(false);
   };
 
-  const shareSaved = async (it: Shareable) => {
+  const shareSaved = async (it: LibraryItem) => {
     setBusy(true);
     setError("");
     try {
