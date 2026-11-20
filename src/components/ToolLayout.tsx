@@ -50,7 +50,7 @@ export function ToolNav() {
     <header className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-4 px-4 pt-5 sm:px-6">
       <SemosLogo />
 
-      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4">
+      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <ul className="flex gap-2">
           {TOOLS.map((t) => {
             const active = pathname === t.href;

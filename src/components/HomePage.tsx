@@ -13,6 +13,7 @@ import {
   Gauge,
   LayoutGrid,
   ListChecks,
+  Mic,
   NotebookText,
   Sparkles,
   Sun,
@@ -100,6 +101,7 @@ const BTN_GLASS = `inline-flex items-center justify-center gap-2 whitespace-nowr
 
 const TOOLS = [
   { href: "/pyq", label: "PYQ Predictor", text: "Past papers into likely questions and a cram plan", icon: ScanSearch },
+  { href: "/viva", label: "Viva Simulator", text: "An AI examiner quizzes you out loud and marks you", icon: Mic },
   { href: "/mastersheet", label: "Mastersheet", text: "Past papers into a one-page exam sheet", icon: BookOpenCheck },
   { href: "/grade-analyzer", label: "Grade Analyzer", text: "What you need in each subject for your CGPA", icon: Target },
   { href: "/note-builder", label: "Note Builder", text: "Messy notes into clean revision notes", icon: NotebookText },
