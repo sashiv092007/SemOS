@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
 import { saveToLibrary } from "@/lib/account";
 import SavedShelf from "./SavedShelf";
+import { takeHandoff } from "@/lib/handoff";
 import Lazy3D from "./three/Lazy3D";
 import {
   Check,
@@ -536,6 +537,13 @@ export default function NoteBuilder() {
     finish();
     triggerSweep();
   };
+
+  // Notes shared in a Class Room arrive here when opened.
+  useEffect(() => {
+    const handed = takeHandoff("notes");
+    if (handed) openSaved(handed); // eslint-disable-line react-hooks/set-state-in-effect -- one-off read of sessionStorage after hydration
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on arrival
+  }, []);
 
   const startBuild = async (useFiles) => {
     if (status === "processing") return;

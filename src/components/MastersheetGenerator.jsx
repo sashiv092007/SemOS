@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { triggerSweep } from "@/lib/sweep";
 import { saveToLibrary } from "@/lib/account";
 import SavedShelf from "./SavedShelf";
+import { takeHandoff } from "@/lib/handoff";
 import Lazy3D from "./three/Lazy3D";
 import { CARD_ACTIVE, FIELD, Glow, LABEL, PANEL, WindowBar } from "./ui";
 import { BookOpen, ChevronDown, FileText, Loader2, ScrollText, Sparkles, Upload, X } from "lucide-react";
@@ -796,6 +797,31 @@ export default function MastersheetGenerator() {
     clearTimeout(debounce.current);
     runAnalysis(notes, pyqs);
   };
+
+  // Handed over from another page: a full mastersheet shared in a Class Room opens as it is;
+  // a topic list (PYQ Predictor's Panic Mode) fills the form and starts the AI.
+  const [autoRun, setAutoRun] = useState(false);
+  useEffect(() => {
+    const handed = takeHandoff("mastersheet");
+    if (!handed || !Array.isArray(handed.topics)) return;
+    if (handed.ai) {
+      openSaved(handed);
+      return;
+    }
+    setSubject(handed.subject ?? "");
+    setUnit(handed.unit ?? "");
+    setTopics(handed.topics.slice(0, MAX_TOPICS));
+    setNotes([]);
+    setPyqs([]);
+    setEdited({ subject: true, unit: true, topics: true });
+    setAi({ status: "idle", data: null, error: "", at: "", stale: false });
+    setAutoRun(true);
+  }, []);
+  useEffect(() => {
+    if (!autoRun) return;
+    setAutoRun(false);
+    runAnalysis([], []);
+  }, [autoRun]);
 
   return (
 <>

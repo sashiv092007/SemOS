@@ -16,7 +16,9 @@ import {
   NotebookText,
   Sparkles,
   Sun,
+  ScanSearch,
   Target,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 import { buildSchedule, deadlineOf, formatRemaining, timeEntries, useNow, usePlan, type Plan } from "@/lib/plan";
@@ -26,6 +28,7 @@ import Hourglass3D from "./Hourglass3D";
 import AccountButton from "./AccountButton";
 import ThemeToggle from "./ThemeToggle";
 import SemosLogo from "./SemosLogo";
+import ShareForecast from "./ShareForecast";
 import { DocumentSheet, SandTimer } from "./SemOSLandingPage";
 
 /* ------------------------------------------------------------------ */
@@ -96,10 +99,12 @@ const BTN_DARK = `inline-flex items-center justify-center gap-2 whitespace-nowra
 const BTN_GLASS = `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white/70 px-5 py-2.5 text-sm font-semibold text-slate-800 ring-1 ring-white/80 backdrop-blur-md transition-colors duration-150 hover:bg-white ${FOCUS}`;
 
 const TOOLS = [
+  { href: "/pyq", label: "PYQ Predictor", text: "Past papers into likely questions and a cram plan", icon: ScanSearch },
   { href: "/mastersheet", label: "Mastersheet", text: "Past papers into a one-page exam sheet", icon: BookOpenCheck },
   { href: "/grade-analyzer", label: "Grade Analyzer", text: "What you need in each subject for your CGPA", icon: Target },
   { href: "/note-builder", label: "Note Builder", text: "Messy notes into clean revision notes", icon: NotebookText },
   { href: "/roadmap", label: "Roadmap", text: "Every assignment planned to its deadline", icon: CalendarClock },
+  { href: "/rooms", label: "Class Rooms", text: "Share papers, notes and deadlines with your class", icon: UsersRound },
 ];
 
 const fmtH = (h: number) => `${Number.isInteger(h) ? h : h.toFixed(1)}h`;
@@ -399,9 +404,12 @@ function Dashboard({ theme, stats, reason, hasPlan }: { theme: Theme; stats: Sta
         <p className="mt-3 text-[13px] font-medium leading-snug text-slate-600" aria-live="polite">
           {reason}
         </p>
-        <Link href="/roadmap" className={`${BTN_DARK} mt-auto w-full px-3 py-2 text-xs`}>
-          {hasPlan ? "Open schedule" : "Create a schedule"}
-        </Link>
+        <div className="mt-auto grid gap-2 pt-3">
+          {hasPlan ? <ShareForecast className={`${BTN_GLASS} w-full px-3 py-2 text-xs`} label="Share forecast" /> : null}
+          <Link href="/roadmap" className={`${BTN_DARK} w-full px-3 py-2 text-xs`}>
+            {hasPlan ? "Open schedule" : "Create a schedule"}
+          </Link>
+        </div>
       </section>
 
       {/* Tools list */}

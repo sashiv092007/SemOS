@@ -5,26 +5,23 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import AccountButton from "./AccountButton";
 import SemosLogo from "./SemosLogo";
+import { TOOLS } from "@/lib/tools";
 import {
   ArrowDown,
   ArrowUp,
   ArrowUpRight,
   BarChart3,
-  BookOpenCheck,
-  CalendarClock,
   CalendarDays,
   Check,
   Clock3,
   House,
   LayoutGrid,
   ListChecks,
-  NotebookText,
   Pencil,
   PieChart,
   Plus,
   Send,
   Sparkles,
-  Target,
   Trash2,
   X,
 } from "lucide-react";
@@ -109,12 +106,6 @@ const midnight = (t: number) => {
 /*  Top bar and side rail                                              */
 /* ------------------------------------------------------------------ */
 
-const TOOLS = [
-  { href: "/mastersheet", label: "Mastersheet", icon: BookOpenCheck },
-  { href: "/grade-analyzer", label: "Grade Analyzer", icon: Target },
-  { href: "/note-builder", label: "Note Builder", icon: NotebookText },
-  { href: "/roadmap", label: "Roadmap", icon: CalendarClock },
-];
 
 function TopBar({ plan, now }: { plan: Plan | null | undefined; now: number }) {
   const pathname = usePathname();
@@ -126,7 +117,7 @@ function TopBar({ plan, now }: { plan: Plan | null | undefined; now: number }) {
     <header className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-4 px-4 pt-5 sm:px-6">
       <SemosLogo />
 
-      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 lg:order-none lg:mx-0 lg:w-auto lg:px-0">
+      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4">
         <ul className="flex gap-2">
           {TOOLS.map((t) => {
             const active = pathname === t.href;

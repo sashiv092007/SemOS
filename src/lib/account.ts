@@ -186,7 +186,7 @@ export async function signOut() {
 
 /* ---------- Library: saved mastersheets and notes ---------- */
 
-export type LibraryKind = "mastersheet" | "notes";
+export type LibraryKind = "mastersheet" | "notes" | "pyq";
 export type LibraryItem = { id: string; kind: LibraryKind; title: string; created_at: string };
 
 const LIBRARY_EVENT = "semos:library";

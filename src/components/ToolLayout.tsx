@@ -5,20 +5,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowDown,
-  BookOpenCheck,
   CalendarClock,
   Clock3,
   House,
   LayoutGrid,
-  NotebookText,
   Sparkles,
-  Target,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { deadlineOf, useNow, usePlan } from "@/lib/plan";
 import AccountButton from "./AccountButton";
 import SemosLogo from "./SemosLogo";
+import { TOOLS } from "@/lib/tools";
 
 /*
  * Dashboard chrome shared by Mastersheet, Grade Analyzer and Note Builder.
@@ -32,12 +30,6 @@ const CARD =
 const BTN_GREEN = `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[#3ee07a] px-5 py-2.5 text-sm font-bold text-[#2a0730] shadow-[0_8px_20px_-8px_rgba(34,197,94,0.7)] transition-colors duration-150 hover:bg-[#5cf091] ${FOCUS}`;
 const BTN_LIGHT = `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#5b1065] shadow-[0_1px_2px_rgba(59,10,69,0.05)] ring-1 ring-[#5b1065]/15 transition-colors duration-150 hover:bg-fuchsia-50 ${FOCUS}`;
 
-const TOOLS = [
-  { href: "/mastersheet", label: "Mastersheet", icon: BookOpenCheck },
-  { href: "/grade-analyzer", label: "Grade Analyzer", icon: Target },
-  { href: "/note-builder", label: "Note Builder", icon: NotebookText },
-  { href: "/roadmap", label: "Roadmap", icon: CalendarClock },
-];
 
 const DAY = 86_400_000;
 
@@ -58,7 +50,7 @@ export function ToolNav() {
     <header className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-4 px-4 pt-5 sm:px-6">
       <SemosLogo />
 
-      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 lg:order-none lg:mx-0 lg:w-auto lg:px-0">
+      <nav aria-label="Tools" className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4">
         <ul className="flex gap-2">
           {TOOLS.map((t) => {
             const active = pathname === t.href;
